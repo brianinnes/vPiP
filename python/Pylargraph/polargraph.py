@@ -14,6 +14,8 @@ class Polargraph:
         self.maxSegment = 200
         self.outOfBounds = False
         self.outOfBoundsDrawingCoord = None
+        self.outstandingMove = False
+        self.moveSystemCoordinates = None
         print(self.config)
 
         if self.config.pixels > 0:
@@ -71,17 +73,22 @@ class Polargraph:
     #   High level drawing functions
     def moveTo(self, x, y):
         point = Coordinate.fromCoords(x, y, True)
-        coordsSystem = self.config.drawing2systemCoords(point)
-        self.serial.sendCommand(coordsSystem)
-        self.currPosSysCoords = Coordinate.fromCoords(coordsSystem.x, coordsSystem.y, coordsSystem.penup)
+        self.moveSystemCoordinates = self.config.drawing2systemCoords(point)
+        self.outstandingMove = True
 
     def drawTo(self, x, y):
+        if self.outstandingMove:
+            self.serial.sendCommand(self.moveSystemCoordinates)
+            self.CurrPosSysCoords = Coordinate.fromCoords(self.moveSystemCoordinates.x, self.moveSystemCoordinates.y, self.moveSystemCoordinates.penup)
+            self.outstandingMove = False
         point = Coordinate.fromCoords(x, y, False)
         coordsSystem = self.config.drawing2systemCoords(point)
         self.serial.sendCommand(coordsSystem)
         self.currPosSysCoords = Coordinate.fromCoords(coordsSystem.x, coordsSystem.y, coordsSystem.penup)
 
     def goHome(self):
+        self.outstandingMove = False
+        self.moveSystemCoordinates = None
         self.currPosSysCoords = Coordinate.fromCoords(self.config.homeX, self.config.homeY, True)
         self.serial.sendCommand(self.currPosSysCoords)
         self.serial.sendCommand(self.currPosSysCoords)
