@@ -1,2 +1,13 @@
 # pycupi
-A python library with accompanying Arduino code, based off the gocupi project.  This port has been modified to run on the Polargraph driver board created by makeBournemouth
+Driving a Polargraph machine
+
+A python library with accompanying Arduino code, based on the gocupi project.  This port has been modified to run on the Polargraph driver board created by makeBournemouth
+
+Links:  
+
+- makeBournemouth [https://www.makebournemouth.com]()
+- Controller board : [https://github.com/MarkJB/Eggbot-Spherebot-Polargraph-Controller]()
+-  gocupi : [https://github.com/brandonagr/gocupi]()
+
+Want to know what a Polargraph machine is?  [http://www.polargraph.co.uk]()
+
