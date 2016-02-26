@@ -47,13 +47,13 @@ class TrapezoidInterpolater:
             self.direction = self.direction.normalised()
 
             nextDirection = nextDest - dest
-            if nextDirection.length() == 0 or origin.penup != dest.penup:
-                nextDirection = Coordinate.fromCoords(-self.direction.x, -self.direction.y, nextDirection.penup)
+            if nextDirection.length() == 0 or nextDest.penup != dest.penup:
+                self.exitSpeed = 0
             else:
                 nextDirection = nextDirection.normalised()
-            cosAngle = self.direction.dotProduct(nextDirection)
-            cosAngle = pow(cosAngle, 3)
-            self.exitSpeed = config.MaxSpeedMMs * max(cosAngle, 0.0)
+                cosAngle = self.direction.dotProduct(nextDirection)
+                cosAngle = pow(cosAngle, 3)
+                self.exitSpeed = config.MaxSpeedMMs * max(cosAngle, 0.0)
             self.cruiseSpeed = config.MaxSpeedMMs
 
             self.accelTime = (self.cruiseSpeed - self.entrySpeed) / config.AccelerationMMs2
