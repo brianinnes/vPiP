@@ -1,7 +1,7 @@
 from os.path import expanduser, isfile, exists, dirname
 from os import makedirs
 from coordinates import Coordinate, PolarCoordinate
-from math import sqrt
+from math import sqrt, floor
 import ConfigParser
 import errno
 
@@ -13,11 +13,41 @@ class PolarConfig:
         self.penDownCommand = 127
         self.stepsMaxValue = 126.0
         self.configFile = None
+        self.configured = False
         self.penSize = 0
         self.machineWidth = 0
         self.machineHeight = 0
-        self.mmPerRev = 0
+        self.mmPerRev = 0.0
         self.stepsPerRev = 0
+        self.stepMultiplier = 0
+        self.serialPort = ''
+        self.timeSliceUS = 0
+        self.baud = 0
+        self.motorAccel = 0.0
+        self.motorMaxSpeed = 0.0
+        self.penUp = 0
+        self.penDown = 0
+        self.homeX = 0
+        self.homeY = 0
+        self.polarDraw = False
+        self.size = ''
+        self.width = 0
+        self.height = 0
+        self.posX = 0
+        self.posY = 0
+        self.margin = 0
+        self.pixels = 0
+        self.rotate = False
+        self.screenX = 0
+        self.showImage = False
+        self.saveImage = False
+        self.stepsSizeMM = 0.0
+        self.stepsPerValue = 0.0
+        self.MaxSpeedMMs = 0.0
+        self.AccelerationMMs2 = 0.0
+        self.pixelsPerMM = 0.0
+        self.heightPixels = 0.0
+        self.heightScreen = 0
         self.loadConfig()
 
     def __str__(self):
@@ -39,18 +69,24 @@ class PolarConfig:
              "penDown = {}".format(self.penDown),
              "homeX = {}".format(self.homeX),
              "homeY = {}".format(self.homeY),
+             "polarDraw = {}".format(self.polarDraw),
              "size = {}".format(self.size),
              "width = {}".format(self.width),
              "height = {}".format(self.height),
              "posX = {}".format(self.posX),
              "posY = {}".format(self.posY),
              "margin = {}".format(self.margin),
-             "pixels = {}".format(self.pixels),
+             "pixelsX = {}".format(self.pixels),
+             "pixelsY = {}".format(self.heightPixels),
              "rotate = {}".format(self.rotate),
              "stepsSizeMM = {}".format(self.stepsSizeMM),
              "stepsPerValue = {}".format(self.stepsPerValue),
              "MaxSpeedMMs = {}".format(self.MaxSpeedMMs),
-             "AccelerationMMs2 = {}".format(self.AccelerationMMs2)))
+             "AccelerationMMs2 = {}".format(self.AccelerationMMs2),
+             "screenX = {}".format(self.screenX),
+             "screenY = {}".format(self.heightScreen),
+             "showImage = {}".format(self.showImage),
+             "saveImage = {}".format(self.saveImage)))
 
     def loadConfig(self):
         self.configFile = expanduser("~/.polargraph/config.cfg")
@@ -74,6 +110,7 @@ class PolarConfig:
             self.penDown = config.getint('Polargraph', 'penDown')
             self.homeX = config.getint('Polargraph', 'homeX')
             self.homeY = config.getint('Polargraph', 'homeY')
+            self.polarDraw = config.getboolean('Polargraph', 'polarDraw')
             self.size = config.get('Paper', 'size')
             self.width = config.getint('Paper', 'width')
             self.height = config.getint('Paper', 'height')
@@ -82,6 +119,9 @@ class PolarConfig:
             self.margin = config.getint('Paper', 'margin')
             self.pixels = config.getint('Paper', 'pixels')
             self.rotate = config.getboolean('Paper', 'rotate')
+            self.screenX = config.getint('Screen', 'screenX')
+            self.showImage = config.getboolean('Screen', 'showImage')
+            self.saveImage = config.getboolean('Screen', 'saveImage')
         else:
             self.configured = False
             self.createDefaultConfig()
@@ -93,7 +133,8 @@ class PolarConfig:
             (self.stepsPerValue / (self.timeSliceUS / 1000000.0)) / stepsPerRevolution) * self.mmPerRev)
         self.AccelerationMMs2 = self.MaxSpeedMMs / self.motorAccel
         self.pixelsPerMM = float(self.pixels) / (self.width - 2 * self.margin)
-        self.HeightPixels = (self.height - 2 * self.margin) * self.pixelsPerMM
+        self.heightPixels = int(floor(float((self.height) - 2 * self.margin) * self.pixelsPerMM))
+        self.heightScreen = int(floor(float(self.heightPixels) * self.screenX/self.pixels))
 
     def createDefaultConfig(self):
         config = ConfigParser.ConfigParser()
@@ -113,6 +154,7 @@ class PolarConfig:
         config.set('Polargraph', 'penDown', '0')
         config.set('Polargraph', 'homeX', '0')
         config.set('Polargraph', 'homeY', '0')
+        config.set('Polargraph', 'polarDraw', True)
         config.add_section('Paper')
         config.set('Paper', 'size', 'custom')
         config.set('Paper', 'width', 0)
@@ -122,6 +164,9 @@ class PolarConfig:
         config.set('Paper', 'margin', 0)
         config.set('Paper', 'pixels', 0)
         config.set('Paper', 'rotate', False)
+        config.set('Screen', 'screenX', 0)
+        config.set('Screen', 'showImage', False)
+        config.set('Screen', 'saveImage', False)
         if not exists(dirname(self.configFile)):
             try:
                 makedirs(dirname(self.configFile))
@@ -150,6 +195,7 @@ class PolarConfig:
             config.set('Polargraph', 'penDown', self.penDown)
             config.set('Polargraph', 'homeX', self.homeX)
             config.set('Polargraph', 'homeY', self.homeY)
+            config.set('Polargraph', 'polarDraw', self.polarDraw)
             config.add_section('Paper')
             config.set('Paper', 'size', self.size)
             config.set('Paper', 'width', self.width)
@@ -157,8 +203,12 @@ class PolarConfig:
             config.set('Paper', 'posX', self.posX)
             config.set('Paper', 'posY', self.posY)
             config.set('Paper', 'margin', self.margin)
-            config.set('Paper', 'pixels', self.pixels)
+            config.set('Paper', 'pixelsX', self.pixels)
             config.set('Paper', 'rotate', self.rotate)
+            config.add_section('Screen')
+            config.set('Screen', 'screenX', self.screenX)
+            config.set('Screen', 'showImage', self.showImage)
+            config.set('Screen', 'saveImage', self.saveImage)
             if not exists(dirname(self.configFile)):
                 try:
                     makedirs(dirname(self.configFile))
@@ -177,7 +227,7 @@ class PolarConfig:
         :param coord:
         :rtype: Coordinate
         """
-        mmCoord = coord.translate(self.posX - self.margin, self.posY - self.margin)
+        mmCoord = coord.translate(self.posX - self.margin, self.posY  - self.margin)
         return mmCoord * self.pixelsPerMM
 
     def drawing2systemCoords(self, coord):
@@ -185,12 +235,18 @@ class PolarConfig:
         :param coord:
         :rtype: Coordinate
         """
-        mmCoord =  coord.divide(self.pixelsPerMM)
+        mmCoord = coord.divide(self.pixelsPerMM)
         return mmCoord.translate(self.posX + self.margin, self.posY + self.margin)
+
+    def drawing2screenCoords(self, coord):
+        """
+        :type coord: Coordinate
+        :rtype: Coordinate
+        """
+        return coord*self.screenX/self.pixels
 
     def system2polarCoords(self, coord):
         """
-
         :param coord:
         :rtype: PolarCoordinate
         """
@@ -200,14 +256,13 @@ class PolarConfig:
 
     def polar2systemCoords(self, coord):
         """
-
         :param coord:
         :rtype: Coordinate
         """
         if coord.leftDist + coord.rightDist > self.machineWidth:
             # print "polar2systemCoords-{}".format(coord)
-            x = ((float(coord.leftDist * coord.leftDist) - (coord.rightDist * coord.rightDist)
-                  + float(self.machineWidth * self.machineWidth)) / (2.0 * self.machineWidth))
+            x = ((float(coord.leftDist * coord.leftDist) - (coord.rightDist * coord.rightDist) +
+                  float(self.machineWidth * self.machineWidth)) / (2.0 * self.machineWidth))
             y = sqrt((coord.leftDist * coord.leftDist) - (x * x))
             return Coordinate.fromCoords(x, y, coord.penup)
         else:

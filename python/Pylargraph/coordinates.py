@@ -6,9 +6,9 @@ class Coordinate:
     def fromCoords(cls, x, y, penup):
         """
 
-        :param penup:
-        :param y:
-        :param x:
+        :param penup: bool
+        :param y: float
+        :param x: float
         :rtype: Coordinate
         """
         obj = cls()
