@@ -158,5 +158,5 @@ class PolarCoordinate:
 
     def clamp(self, mx, mn):
         if self.leftDist > mx or self.leftDist < mn or self.rightDist > mx or self.rightDist < mn:
-            print('Clampling coord {} between {} and {}').format(self, mn, mx)
+            print 'Clampling coord {} between {} and {}'.format(self, mn, mx)
         return PolarCoordinate.fromCoords(min(mx, max(self.leftDist, mn)), min(mx, max(self.rightDist, mn)), self.penup)

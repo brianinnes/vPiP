@@ -3,11 +3,10 @@ import traceback
 from Queue import Queue
 from array import array
 from threading import Thread, Event
-
 from serial import Serial
-
 from coordinates import Coordinate, PolarCoordinate
 from interpolator import TrapezoidInterpolater
+from time import sleep
 
 
 class SerialHandler:
@@ -67,9 +66,10 @@ class SerialHandler:
                     self.stepQueue.put(ls)
                     self.stepQueue.put(rs)
                     prevPolarPos = polarHome + PolarCoordinate.fromCoords(totalLeftSteps * scalefactor,
-                                                                   totalRightSteps * scalefactor, target.penup)
+                                                                          totalRightSteps * scalefactor, target.penup)
                 origin = self.config.polar2systemCoords(prevPolarPos)
                 target = nextTarget
+                sleep(0)
             except:
                 exc_type, exc_value, exc_traceback = sys.exc_info()
                 print("Coord handler thread exception : %s" % exc_type)
@@ -95,6 +95,7 @@ class SerialHandler:
                             q.task_done()
                     self.serialPort.write(writeData.tostring())
                     self.serialPort.flush()
+                    sleep(0)
 
             except:
                 exc_type, exc_value, exc_traceback = sys.exc_info()

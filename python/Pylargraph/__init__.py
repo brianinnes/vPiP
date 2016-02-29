@@ -1,1 +1,1 @@
-__all__ = ['polargraph']
+__all__ = ['polargraph', 'constrainDrawingRectangle']

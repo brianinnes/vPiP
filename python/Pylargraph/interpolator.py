@@ -15,6 +15,8 @@ class TrapezoidInterpolater:
         self.accelTime = 0.0
         self.decelDist = 0.0
         self.decelTime = 0.0
+        self.cruiseDist = 0.0
+        self.cruiseTime = 0.0
         self.acceleration = 0.0
         self.time = 0.0
         self.slices = 0
@@ -73,8 +75,9 @@ class TrapezoidInterpolater:
 
             if self.distance < self.accelDist + self.decelDist:
                 self.decelTime = (sqrt(2) * sqrt(
-                    self.exitSpeed * self.exitSpeed + self.entrySpeed * self.entrySpeed + 2 * config.AccelerationMMs2 * self.distance) - 2 * self.exitSpeed) / (
-                                     2 * config.AccelerationMMs2)
+                    self.exitSpeed * self.exitSpeed + self.entrySpeed * self.entrySpeed +
+                    2 * config.AccelerationMMs2 * self.distance) - 2 * self.exitSpeed) / \
+                                 (2 * config.AccelerationMMs2)
                 self.cruiseTime = 0
                 self.cruiseSpeed = self.exitSpeed + config.AccelerationMMs2 * self.decelTime
                 self.accelTime = (self.cruiseSpeed - self.entrySpeed) / config.AccelerationMMs2

@@ -133,7 +133,7 @@ class PolarConfig:
             (self.stepsPerValue / (self.timeSliceUS / 1000000.0)) / stepsPerRevolution) * self.mmPerRev)
         self.AccelerationMMs2 = self.MaxSpeedMMs / self.motorAccel
         self.pixelsPerMM = float(self.pixels) / (self.width - 2 * self.margin)
-        self.heightPixels = int(floor(float((self.height) - 2 * self.margin) * self.pixelsPerMM))
+        self.heightPixels = int(floor(float(self.height - 2 * self.margin) * self.pixelsPerMM))
         self.heightScreen = int(floor(float(self.heightPixels) * self.screenX/self.pixels))
 
     def createDefaultConfig(self):
