@@ -32,7 +32,7 @@ class ConstrainDrawingRectangle:
         if leaving:
             m = (self.currentDrawingPosition.y - coord.y) / (self.currentDrawingPosition.x - coord.x)
             b = self.currentDrawingPosition.y - m * self.currentDrawingPosition.x
-            if coord.x < 0:
+            if coord.x < self.constraint1.x:
                 ret = Coordinate.fromCoords(self.constraint1.x, m * self.constraint1.x + b, coord.penup)
                 if self.isOutsideDrawingArea(ret):
                     ret = None
@@ -41,7 +41,7 @@ class ConstrainDrawingRectangle:
                 if self.isOutsideDrawingArea(ret):
                     ret = None
             if ret is None and coord.y < self.constraint1.y:
-                ret = Coordinate.fromCoords(self.constraint1.y - b / m, self.constraint1.y, coord.penup)
+                ret = Coordinate.fromCoords((self.constraint1.y - b) / m, self.constraint1.y, coord.penup)
                 if self.isOutsideDrawingArea(ret):
                     ret = None
             if ret is None and coord.y > self.constraint2.y:
@@ -51,7 +51,7 @@ class ConstrainDrawingRectangle:
         else:
             m = (coord.y - self.outOfBoundsDrawingCoord.y) / (coord.x - self.outOfBoundsDrawingCoord.x)
             b = coord.y - m * coord.x
-            if self.outOfBoundsDrawingCoord.x < 0:
+            if self.outOfBoundsDrawingCoord.x < self.constraint1.x:
                 ret = Coordinate.fromCoords(self.constraint1.x, m * self.constraint1.x + b, coord.penup)
                 if self.isOutsideDrawingArea(ret):
                     ret = None
@@ -60,7 +60,7 @@ class ConstrainDrawingRectangle:
                 if self.isOutsideDrawingArea(ret):
                     ret = None
             if ret is None and self.outOfBoundsDrawingCoord.y < self.constraint1.y:
-                ret = Coordinate.fromCoords(self.constraint1.y - b / m, self.constraint1.y, coord.penup)
+                ret = Coordinate.fromCoords((self.constraint1.y - b) / m, self.constraint1.y, coord.penup)
                 if self.isOutsideDrawingArea(ret):
                     ret = None
             if ret is None and self.outOfBoundsDrawingCoord.y > self.constraint2.y:
