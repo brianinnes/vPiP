@@ -4,8 +4,7 @@ from Pylargraph import *
 from Pylargraph.renderers.norwegianSpiral import renderNorwegianSpiral
 Polargraph = polargraph.Polargraph
 
-filename = "Angel.jpg"
-#filename = "Vulcan.jpg"
+filename = "Vulcan.jpg"
 with Polargraph() as p:
     try:
         renderNorwegianSpiral(filename, 300, 200, 600, 9.6, 10, 3, p)
