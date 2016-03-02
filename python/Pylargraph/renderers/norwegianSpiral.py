@@ -1,5 +1,6 @@
 from ..constrainDrawingRectangle import ConstrainDrawingRectangle
 from ..generators.spiral import generateSpiral
+from ..coordinates import Coordinate
 from PIL import Image
 from math import sqrt, log10
 import sys
@@ -16,8 +17,6 @@ def renderNorwegianSpiral(fileName, x, y, width, density, maxDensity, resolution
         height = imgHeight * width / imgWidth
         drawingConstraint = ConstrainDrawingRectangle(x, y, width + x, height + y, drawer)
 
-
-
         centre = (width / 2, height / 2)
         radius = sqrt((centre[0] * centre[0]) + (centre[1] * centre[1]))
 
@@ -33,15 +32,39 @@ def renderNorwegianSpiral(fileName, x, y, width, density, maxDensity, resolution
         logPixmax = log10(pixmax)
 
         def circleBlip(centre, point, length):
-            m = (point[1] - centre[1]) / (point[0] - centre[0])
-            b = point[1] - m * point[0]
+            """
+            circleBlip: calculates points away from a given point lenght away from the point on a line intersecting
+            the centre point of a circle and the given point.  The first returned point is the point nearest to the
+            centre of the circle and the second point is the furthest away from the centre
 
-            diff = sqrt(length * length / (1 + m * m))
-            x1 = point[0] - diff
-            x2 = point[0] + diff
+            :param centre: centre point for spiral
+            :param point: current point to move away from
+            :param length: length to move away from current point
+            :return: 2 tuples, representing the coordinates either side of the point, length away
+            """
+            if point[0] == centre[0]:
+                x1 = point[0]
+                x2 = point[0]
+                if point[1] > centre[1]:
+                    y1 = point[1] + length
+                    y2 = point[1] - length
+                else:
+                    y1 = point[1] - length
+                    y2 = point[1] + length
+            else:
+                m = (point[1] - centre[1]) / (point[0] - centre[0])
+                b = point[1] - m * point[0]
+                diff = sqrt(length * length / (1 + m * m))
 
-            y1 = m * x1 + b
-            y2 = m * x2 + b
+                if point[0] < centre[0]:
+                    x1 = point[0] + diff
+                    x2 = point[0] - diff
+                else:
+                    x1 = point[0] - diff
+                    x2 = point[0] + diff
+
+                y1 = m * x1 + b
+                y2 = m * x2 + b
             return (x1, y1), (x2, y2)
 
         def scaleDownCoords(pt):
@@ -58,7 +81,6 @@ def renderNorwegianSpiral(fileName, x, y, width, density, maxDensity, resolution
                 y = 0
             return x, y
 
-
         count = 0
         for i in points:
             point = (i[0], i[1])
@@ -73,10 +95,13 @@ def renderNorwegianSpiral(fileName, x, y, width, density, maxDensity, resolution
                     cpixel = pixmax
                 cpixelLOG = (log10(cpixel) - logPixmin) / (logPixmax - logPixmin)
                 density = (separation / 2) - cpixelLOG * separation / 2
-                if density > 0.02:
+                if density > 0.02 and not drawingConstraint.isOutsideDrawingArea(Coordinate.fromCoords(point[0] + x, point[1] + y, False)):
                     blip = circleBlip(centre, point, density)
                     drawingConstraint.drawTo(blip[0][0] + x, blip[0][1] + y)
-                    drawingConstraint.drawTo(blip[1][0] + x, blip[1][1] + y)
+                    outerBlipCoord = Coordinate.fromCoords(blip[1][0] + x, blip[1][1] + y, False)
+                    if drawingConstraint.isOutsideDrawingArea(outerBlipCoord):
+                        outerBlipCoord = drawingConstraint.crossBoundary(outerBlipCoord, True)
+                    drawingConstraint.drawTo(outerBlipCoord.x, outerBlipCoord.y)
                 else:
                     drawingConstraint.moveTo(point[0] + x, point[1] + y)
             count += 1
