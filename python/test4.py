@@ -13,17 +13,20 @@
 # limitations under the License.
 import sys
 import traceback
-from Pylargraph import *
-from Pylargraph.renderers.norwegianSpiral import renderNorwegianSpiral
-Polargraph = polargraph.Polargraph
+from Pylargraph.polargraph import Polargraph
+from Pylargraph.renderers.svg import renderSVG
 
-filename = "Vulcan.jpg"
+
+filename = "Vulcan.svg"
+
 with Polargraph() as p:
+    p.setShowDrawing(True)
+    p.setPlotting(False)
     try:
-        renderNorwegianSpiral(filename, 300, 200, 600, 9.6, 10, 3, p)
-        renderNorwegianSpiral(filename, 200, 1000, 800, 9.7, 10, 3, p)
-        renderNorwegianSpiral(filename, 0, 1950, 1200, 9.8, 10, 3, p)
-        renderNorwegianSpiral(filename, 1200, 0, 3800, 9.9, 10, 3, p)
+        renderSVG(filename, 300, 200, 600, p)
+        renderSVG(filename, 200, 1000, 800, p)
+        renderSVG(filename, 0, 1950, 1200, p)
+        renderSVG(filename, 1200, 0, 3800, p)
         p.goHome()
     except:
         exc_type, exc_value, exc_traceback = sys.exc_info()

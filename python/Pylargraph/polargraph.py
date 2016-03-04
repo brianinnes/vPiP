@@ -82,17 +82,8 @@ class Polargraph:
         self.plotter = None
         self.drawer = None
         self.drawing = self.config.showImage or self.config.saveImage
+        self.started = False
         print(self.config)
-
-        if self.drawing:
-            self.drawer = Drawer(self.config)
-            self.drawerConstraint = ConstrainDrawingRectangle(0, 0, self.config.pixels, self.config.heightPixels,
-                                                              self.drawer)
-
-        if self.config.polarDraw:
-            self.plotter = Plotter(self.config)
-            self.plotterConstraint = ConstrainDrawingRectangle(0, 0, self.config.pixels, self.config.heightPixels,
-                                                               self.plotter)
 
     def __exit__(self, tpe=None, value=None, traceback=None):
         print("Polargraph __exit__")
@@ -100,6 +91,19 @@ class Polargraph:
             self.drawer.finishDrawing()
         if self.config.polarDraw:
             self.plotter.finishDrawing()
+
+    def _start(self):
+        if not self.started:
+            if self.drawing:
+                self.drawer = Drawer(self.config)
+                self.drawerConstraint = ConstrainDrawingRectangle(0, 0, self.config.pixels, self.config.heightPixels,
+                                                                  self.drawer)
+
+            if self.config.polarDraw:
+                self.plotter = Plotter(self.config)
+                self.plotterConstraint = ConstrainDrawingRectangle(0, 0, self.config.pixels, self.config.heightPixels,
+                                                                   self.plotter)
+            self.started = True
 
     def sendCommand(self, coord):
         """
@@ -114,25 +118,70 @@ class Polargraph:
         if self.config.polarDraw:
             self.plotter.sendCommand(coord)
 
+    # Override Config drawing and plotting config
+
+    def setShowDrawing(self, setting):
+        if setting:
+            self.config.showImage = True
+            self.drawing = True
+            self.drawer = Drawer(self.config)
+            self.drawerConstraint = ConstrainDrawingRectangle(0, 0, self.config.pixels, self.config.heightPixels,
+                                                              self.drawer)
+        else:
+            self.config.showImage = False
+            self.drawing = self.config.showImage or self.config.saveImage
+            if not drawing:
+                self.drawer = None
+                self.drawerConstraint = None
+
+    def setSaveDrawing(self, setting):
+        if setting:
+            self.config.saveImage = True
+            self.drawing = True
+            self.drawer = Drawer(self.config)
+            self.drawerConstraint = ConstrainDrawingRectangle(0, 0, self.config.pixels, self.config.heightPixels,
+                                                              self.drawer)
+        else:
+            self.config.saveImage = False
+            self.drawing = self.config.showImage or self.config.saveImage
+            if not drawing:
+                self.drawer = None
+                self.drawerConstraint = None
+
+    def setPlotting(self, setting):
+        self.config.polarDraw = setting
+        if self.config.polarDraw:
+            self.plotter = Plotter(self.config)
+            self.plotterConstraint = ConstrainDrawingRectangle(0, 0, self.config.pixels, self.config.heightPixels,
+                                                               self.plotter)
+        else:
+            self.plotter = None
+            self.plotterConstraint = None
+
+
     # High level drawing functions
     def moveTo(self, x, y):
+        self._start()
         if self.drawing:
             self.drawerConstraint.moveTo(x, y)
         if self.config.polarDraw:
             self.plotterConstraint.moveTo(x, y)
 
     def drawTo(self, x, y):
+        self._start()
         if self.drawing:
             self.drawerConstraint.drawTo(x, y)
         if self.config.polarDraw:
             self.plotterConstraint.drawTo(x, y)
 
     def goHome(self):
+        self._start()
         if self.config.polarDraw:
             self.plotter.goHome()
         home = self.config.system2drawingCoords(Coordinate.fromCoords(self.config.homeX, self.config.homeY, True))
         self.moveTo(home.x, home.y)
 
     def penUp(self):
+        self._start()
         if self.config.polarDraw:
             self.plotter.penUp()

@@ -80,14 +80,14 @@ class Coordinate:
         :param factor:
         :rtype: Coordinate
         """
-        return Coordinate.fromCoords(self.x * factor, self.y * factor, self.penup)
+        return Coordinate.fromCoords(float(self.x) * factor, float(self.y) * factor, self.penup)
 
     def divide(self, factor):
         """
         :param factor:
         :rtype: Coordinate
         """
-        return Coordinate.fromCoords(self.x / factor, self.y / factor, self.penup)
+        return Coordinate.fromCoords(float(self.x) / factor, float(self.y) / factor, self.penup)
 
     def translate(self, factorX, factorY):
         """
