@@ -13,7 +13,7 @@
 # limitations under the License.
 import sys
 import traceback
-from Pylargraph.polargraph import Polargraph
+from Pylargraph.polargraph import Polargraph, ConstrainDrawingRectangle
 from Pylargraph.renderers.svg import renderSVG
 
 
@@ -26,7 +26,8 @@ with Polargraph() as p:
         renderSVG(filename, 300, 200, 600, p)
         renderSVG(filename, 200, 1000, 800, p)
         renderSVG(filename, 0, 1950, 1200, p)
-        renderSVG(filename, 1200, 0, 3800, p)
+        d = ConstrainDrawingRectangle(1200, 0, 5000, p.height, p)
+        renderSVG(filename, 1200, 0, 3800, d, True)
         p.goHome()
     except:
         exc_type, exc_value, exc_traceback = sys.exc_info()

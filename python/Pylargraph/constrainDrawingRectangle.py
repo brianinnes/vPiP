@@ -26,6 +26,8 @@ class ConstrainDrawingRectangle:
         self.outOfBounds = True
         self.outOfBoundsDrawingCoord = None
         self.currentDrawingPosition = None
+        self.width = self.constraint2.x - self.constraint1.x
+        self.height = self.constraint2.y - self.constraint1.y
 
     def isOutsideDrawingArea(self, coord):
         """

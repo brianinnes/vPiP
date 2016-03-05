@@ -84,6 +84,8 @@ class Polargraph:
         self.drawing = self.config.showImage or self.config.saveImage
         self.started = False
         print(self.config)
+        self.width = self.config.pixels
+        self.height = self.config.heightPixels
 
     def __exit__(self, tpe=None, value=None, traceback=None):
         print("Polargraph __exit__")
