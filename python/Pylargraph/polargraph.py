@@ -98,7 +98,6 @@ class Polargraph:
                 self.drawer = Drawer(self.config)
                 self.drawerConstraint = ConstrainDrawingRectangle(0, 0, self.config.pixels, self.config.heightPixels,
                                                                   self.drawer)
-
             if self.config.polarDraw:
                 self.plotter = Plotter(self.config)
                 self.plotterConstraint = ConstrainDrawingRectangle(0, 0, self.config.pixels, self.config.heightPixels,
@@ -113,6 +112,7 @@ class Polargraph:
         :param coord: Coordinate to draw or move to in drawing coordinate system
         :return:
         """
+        self._start()
         if self.drawing:
             self.drawer.sendCommand(coord)
         if self.config.polarDraw:
