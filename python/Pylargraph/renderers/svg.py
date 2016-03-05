@@ -14,6 +14,7 @@
 import sys
 import traceback
 import re
+from math import pow
 from xml.dom import minidom, Node
 from ..coordinates import Coordinate
 
@@ -152,8 +153,8 @@ class NodePath(SVGElement):
             for token in self.FLOAT_RE.findall(x):
                 yield token
 
-    # bezier curve implementation info from : http://pomax.github.io/bezierinfo/
-    def _curveCoord(self, points, t):
+    # cubic bezier curve implementation info from : http://pomax.github.io/bezierinfo/
+    def _cubicCoord(self, points, t):
         if len(points) == 1:
             return points[0]
         else:
@@ -162,7 +163,13 @@ class NodePath(SVGElement):
                 x = (1.0 - t) * points[i][0] + t * points[i+1][0]
                 y = (1.0 - t) * points[i][1] + t * points[i+1][1]
                 newpoints[i] = (x, y)
-            return self._curveCoord(newpoints, t)
+            return self._cubicCoord(newpoints, t)
+
+    # quadratic bezier curve implementation info from : http://stackoverflow.com/questions/31757501/pixel-by-pixel-bezier-curve
+    def _quadraticCoord(self, point, t):
+        x = pow(1.0-t,2)*point[0][0] + 2 * (1.0-t) * t * point[1][0] + pow(t,2) * point[2][0]
+        y = pow(1.0-t,2)*point[0][1] + 2 * (1.0-t) * t * point[1][1] + pow(t,2) * point[2][1]
+        return (x, y)
 
     def curveCoords(self, points):
         minX = min(points[0][0], min(points[1][0], min(points[2][0], points[2][0])))
@@ -175,7 +182,7 @@ class NodePath(SVGElement):
         step = 1.0 / segments
         t = step
         while t < 1.0:
-            point = self._curveCoord(points, t)
+            point = self._cubicCoord(points, t)
             self.drawingCoords.append(Coordinate.fromCoords(point[0], point[1], False))
             t += step
         self.drawingCoords.append(Coordinate.fromCoords(points[3][0], points[3][1], False))

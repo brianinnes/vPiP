@@ -17,7 +17,7 @@ from Pylargraph.polargraph import Polargraph, ConstrainDrawingRectangle
 from Pylargraph.renderers.svg import renderSVG
 
 
-filename = "Vulcan.svg"
+filename = "../testImages/Vulcan.svg"
 
 with Polargraph() as p:
     p.setShowDrawing(True)
