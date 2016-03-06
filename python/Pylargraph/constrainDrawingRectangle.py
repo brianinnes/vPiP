@@ -11,6 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import sys
+import traceback
 from coordinates import Coordinate
 
 
@@ -29,15 +31,18 @@ class ConstrainDrawingRectangle:
         self.width = self.constraint2.x - self.constraint1.x
         self.height = self.constraint2.y - self.constraint1.y
 
+    def __str__(self):
+        return "({}, {})".format(self.constraint1, self.constraint2)
+
     def isOutsideDrawingArea(self, coord):
         """
         :param coord:
         :rtype: bool
         """
-        if coord.x < self.constraint1.x \
-                or coord.x > self.constraint2.x \
-                or coord.y < self.constraint1.y \
-                or coord.y > self.constraint2.y:
+        if coord.x - self.constraint1.x < -0.000001 \
+                or coord.x - self.constraint2.x  > 0.000001 \
+                or coord.y - self.constraint1.y < -0.000001 \
+                or coord.y - self.constraint2.y > 0.000001:
             return True
         else:
             return False
@@ -83,7 +88,8 @@ class ConstrainDrawingRectangle:
                 if self.isOutsideDrawingArea(ret):
                     ret = None
         if ret is None:
-            print("Oops - somethings went wrong")
+            print("ConstrainDrawingRectangle: Oops - somethings went wrong {} - {} or {} : {}").format(coord, self.currentDrawingPosition, self.outOfBoundsDrawingCoord, leaving )
+            print("ConstrainDrawingRectangle: constraints = {}").format(self)
         return ret
 
     def sendCommand(self, coord):
@@ -94,39 +100,44 @@ class ConstrainDrawingRectangle:
         :param coord: Coordinate to draw or move to in drawing coordinate system
         :return:
         """
-        if self.outOfBounds:
-            # last command left current draw position outside drawing area
-            if self.isOutsideDrawingArea(coord):
-                # current command also leaves the draw position outside the drawing area
-                self.outOfBoundsDrawingCoord = coord
-            else:
-                # This command moves the drawing position back into drawing area
-                if coord.penup:
-                    # This command is a move, so simple move to the correct position
-                    self.sendingTarget.sendCommand(coord)
-
+        try:
+            if self.outOfBounds:
+                # last command left current draw position outside drawing area
+                if self.isOutsideDrawingArea(coord):
+                    # current command also leaves the draw position outside the drawing area
+                    self.outOfBoundsDrawingCoord = coord
                 else:
-                    # This command is a draw, so calculate where the line crosses the drawing area boundary and
-                    # draw a line from the crossing point to the point specified in the command
-                    crossBoundryPoint = self.crossBoundary(coord, False)
-                    crossBoundryPoint.penup = True
-                    self.sendingTarget.sendCommand(crossBoundryPoint)
-                    self.sendingTarget.sendCommand(coord)
-                self.outOfBounds = False
-        else:
-            # drawing position before this command was inside the drawing area
-            if self.isOutsideDrawingArea(coord):
-                # This command will take the drawing position outside the drawing area.  I not a move then draw a line
-                # to the point where the line crosses the drawing area boundary
-                if not coord.penup:
-                    crossBoundryPoint = self.crossBoundary(coord, True)
-                    self.sendingTarget.sendCommand(crossBoundryPoint)
-                self.outOfBoundsDrawingCoord = coord
-                self.outOfBounds = True
+                    # This command moves the drawing position back into drawing area
+                    if coord.penup:
+                        # This command is a move, so simple move to the correct position
+                        self.sendingTarget.sendCommand(coord)
+
+                    else:
+                        # This command is a draw, so calculate where the line crosses the drawing area boundary and
+                        # draw a line from the crossing point to the point specified in the command
+                        crossBoundryPoint = self.crossBoundary(coord, False)
+                        crossBoundryPoint.penup = True
+                        self.sendingTarget.sendCommand(crossBoundryPoint)
+                        self.sendingTarget.sendCommand(coord)
+                    self.outOfBounds = False
             else:
-                # all inside drawing area
-                self.sendingTarget.sendCommand(coord)
-            self.currentDrawingPosition = coord
+                # drawing position before this command was inside the drawing area
+                if self.isOutsideDrawingArea(coord):
+                    # This command will take the drawing position outside the drawing area.  I not a move then draw a line
+                    # to the point where the line crosses the drawing area boundary
+                    if not coord.penup:
+                        crossBoundryPoint = self.crossBoundary(coord, True)
+                        self.sendingTarget.sendCommand(crossBoundryPoint)
+                    self.outOfBoundsDrawingCoord = coord
+                    self.outOfBounds = True
+                else:
+                    # all inside drawing area
+                    self.sendingTarget.sendCommand(coord)
+                self.currentDrawingPosition = coord
+        except:
+            exc_type, exc_value, exc_traceback = sys.exc_info()
+            print("ConstrainDrawingRectangle exception : %s" % exc_type)
+            traceback.print_tb(exc_traceback, limit=2, file=sys.stdout)
 
     def moveTo(self, x, y):
         self.moveDrawingCoordinates = Coordinate.fromCoords(x, y, True)

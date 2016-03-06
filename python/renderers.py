@@ -14,22 +14,23 @@
 import sys
 import traceback
 from Pylargraph import *
+from Pylargraph.renderers.spiralArcRenderer import renderSpiralArc
 from Pylargraph.renderers.norwegianSpiral import renderNorwegianSpiral
 Polargraph = polargraph.Polargraph
 
 filename = "../testImages/Vulcan.jpg"
-#filename = "../testImages/TyneBridge.jpg"
-#filename = "../testImages/SydneyOpera.jpg"
-#filename = "../testImages/SydneyOperaNight.jpg"
-#test3.pyfilename = "../testImages/HamptonCourt.jpg"
+# filename = "../testImages/TyneBridge.jpg"
+# filename = "../testImages/SydneyOpera.jpg"
+# filename = "../testImages/SydneyOperaNight.jpg"
+# filename = "../testImages/HamptonCourt.jpg"
 with Polargraph() as p:
     p.setShowDrawing(True)
     p.setPlotting(False)
     try:
-        renderNorwegianSpiral(filename, 300, 200, 600, 9.6, 10, 3, p)
-        renderNorwegianSpiral(filename, 200, 1000, 800, 9.7, 10, 3, p)
-        renderNorwegianSpiral(filename, 0, 1950, 1200, 9.8, 10, 3, p)
-        renderNorwegianSpiral(filename, 1200, 0, 3800, 9.9, 10, 3, p)
+        renderSpiralArc(filename, 10, 10, 2200, 10, p)
+        renderNorwegianSpiral(filename, 2510, 10, 2200, 9.9, 10, 3, p)
+        renderSpiralArc(filename, 10, p.height/2 +10, 2200, 30, p)
+        renderNorwegianSpiral(filename, 2510, p.height/2 + 10, 2200, 9.6, 10, 5, p)
         p.goHome()
     except:
         exc_type, exc_value, exc_traceback = sys.exc_info()
