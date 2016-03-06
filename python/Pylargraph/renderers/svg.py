@@ -43,7 +43,7 @@ class SVGElement:
             "ellipse" : NodeEllipse.fromXMLElement,
             "line" : NodeLine.fromXMLElement,
             "polyline" : NodePolyline.fromXMLElement,
-            "polygone" : NodePolygon.fromXMLElement
+            "polygon" : NodePolygon.fromXMLElement
         }
 
     def __str__(self):
@@ -411,9 +411,34 @@ class NodePolyline(SVGElement):
         return self.drawingCoords
 
 class NodePolygon(SVGElement):
-    def createDrawingCoords(self):
-        return self.drawingCoords
+    def __init__(self, nodeType):
+        SVGElement.__init__(self, nodeType)
+        self.FLOAT_RE = re.compile("[-+]?[0-9]*\.?[0-9]+(?:[eE][-+]?[0-9]+)?")
 
+    def _tokenize_path(self, pathdef):
+        for token in self.FLOAT_RE.findall(pathdef):
+            yield token
+
+    def createDrawingCoords(self):
+        if self.drawingCoords is None:
+            self.drawingCoords = []
+            tokens = self._tokenize_path(self.points)
+            x = float(tokens.next())
+            y = float(tokens.next())
+            startX, startY = x, y
+            self.drawingCoords.append(Coordinate.fromCoords(x, y, True))
+            while True:
+                try:
+                    self.drawingCoords.append(Coordinate.fromCoords(float(tokens.next()), float(tokens.next()), False))
+                except StopIteration:
+                    break
+                except:
+                    exc_type, exc_value, exc_traceback = sys.exc_info()
+                    print("test1 main thread exception : %s" % exc_type)
+                    traceback.print_tb(exc_traceback, limit=2, file=sys.stdout)
+            self.drawingCoords.append(Coordinate.fromCoords(startX, startY, False))
+
+        return self.drawingCoords
 class NodeUnsupported(SVGElement):
     pass
 
@@ -431,6 +456,12 @@ class SVG:
                     self.svgElement = n
                 if n is not None:
                     self.children.append(n)
+        if self.svgElement is not None and not "width" in self.svgElement.__dict__:
+            if "viewBox" in self.svgElement.__dict__:
+                parts = re.findall(r"[\w.]+",  self.svgElement.viewBox)
+                self.svgElement.width = parts[2]
+                self.svgElement.height = parts[3]
+
 
 
     def createDrawingCoords(self):
@@ -466,7 +497,7 @@ class SVG:
                     drawer.drawTo(c.x + x, c.y + y)
         except:
             exc_type, exc_value, exc_traceback = sys.exc_info()
-            print("test1 main thread exception : %s" % exc_type)
+            print("drawSVG exception : %s" % exc_type)
             traceback.print_tb(exc_traceback, limit=2, file=sys.stdout)
 
 

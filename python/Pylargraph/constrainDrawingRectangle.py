@@ -50,43 +50,57 @@ class ConstrainDrawingRectangle:
     def crossBoundary(self, coord, leaving):
         ret = None
         if leaving:
-            m = (self.currentDrawingPosition.y - coord.y) / (self.currentDrawingPosition.x - coord.x)
-            b = self.currentDrawingPosition.y - m * self.currentDrawingPosition.x
-            if coord.x < self.constraint1.x:
-                ret = Coordinate.fromCoords(self.constraint1.x, m * self.constraint1.x + b, coord.penup)
-                if self.isOutsideDrawingArea(ret):
-                    ret = None
-            if ret is None and coord.x > self.constraint2.x:
-                ret = Coordinate.fromCoords(self.constraint2.x, m * self.constraint2.x + b, coord.penup)
-                if self.isOutsideDrawingArea(ret):
-                    ret = None
-            if ret is None and coord.y < self.constraint1.y:
-                ret = Coordinate.fromCoords((self.constraint1.y - b) / m, self.constraint1.y, coord.penup)
-                if self.isOutsideDrawingArea(ret):
-                    ret = None
-            if ret is None and coord.y > self.constraint2.y:
-                ret = Coordinate.fromCoords((self.constraint2.y - b) / m, self.constraint2.y, coord.penup)
-                if self.isOutsideDrawingArea(ret):
-                    ret = None
+            if abs(coord.x - self.currentDrawingPosition.x) < 0.000001:
+                # vertical line
+                if coord.y - self.constraint1.y < -0.000001:
+                    ret = Coordinate.fromCoords(coord.x, self.constraint1.y, coord.penup)
+                elif coord.y - self.constraint2.y > 0.000001:
+                    ret = Coordinate.fromCoords(coord.x, self.constraint2.y, coord.penup)
+            else:
+                m = (self.currentDrawingPosition.y - coord.y) / (self.currentDrawingPosition.x - coord.x)
+                b = self.currentDrawingPosition.y - m * self.currentDrawingPosition.x
+                if coord.x < self.constraint1.x:
+                    ret = Coordinate.fromCoords(self.constraint1.x, m * self.constraint1.x + b, coord.penup)
+                    if self.isOutsideDrawingArea(ret):
+                        ret = None
+                if ret is None and coord.x > self.constraint2.x:
+                    ret = Coordinate.fromCoords(self.constraint2.x, m * self.constraint2.x + b, coord.penup)
+                    if self.isOutsideDrawingArea(ret):
+                        ret = None
+                if ret is None and coord.y < self.constraint1.y:
+                    ret = Coordinate.fromCoords((self.constraint1.y - b) / m, self.constraint1.y, coord.penup)
+                    if self.isOutsideDrawingArea(ret):
+                        ret = None
+                if ret is None and coord.y > self.constraint2.y:
+                    ret = Coordinate.fromCoords((self.constraint2.y - b) / m, self.constraint2.y, coord.penup)
+                    if self.isOutsideDrawingArea(ret):
+                        ret = None
         else:
-            m = (coord.y - self.outOfBoundsDrawingCoord.y) / (coord.x - self.outOfBoundsDrawingCoord.x)
-            b = coord.y - m * coord.x
-            if self.outOfBoundsDrawingCoord.x < self.constraint1.x:
-                ret = Coordinate.fromCoords(self.constraint1.x, m * self.constraint1.x + b, coord.penup)
-                if self.isOutsideDrawingArea(ret):
-                    ret = None
-            if ret is None and self.outOfBoundsDrawingCoord.x > self.constraint2.x:
-                ret = Coordinate.fromCoords(self.constraint2.x, m * self.constraint2.x + b, coord.penup)
-                if self.isOutsideDrawingArea(ret):
-                    ret = None
-            if ret is None and self.outOfBoundsDrawingCoord.y < self.constraint1.y:
-                ret = Coordinate.fromCoords((self.constraint1.y - b) / m, self.constraint1.y, coord.penup)
-                if self.isOutsideDrawingArea(ret):
-                    ret = None
-            if ret is None and self.outOfBoundsDrawingCoord.y > self.constraint2.y:
-                ret = Coordinate.fromCoords((self.constraint2.y - b) / m, self.constraint2.y, coord.penup)
-                if self.isOutsideDrawingArea(ret):
-                    ret = None
+            if abs(coord.x - self.outOfBoundsDrawingCoord.x) < 0.000001:
+                # vertical line
+                if self.outOfBoundsDrawingCoord.y - self.constraint1.y < -0.000001:
+                    ret = Coordinate.fromCoords(coord.x, self.constraint1.y, coord.penup)
+                elif self.outOfBoundsDrawingCoord.y - self.constraint2.y > 0.000001:
+                    ret = Coordinate.fromCoords(coord.x, self.constraint2.y, coord.penup)
+            else:
+                m = (coord.y - self.outOfBoundsDrawingCoord.y) / (coord.x - self.outOfBoundsDrawingCoord.x)
+                b = coord.y - m * coord.x
+                if self.outOfBoundsDrawingCoord.x < self.constraint1.x:
+                    ret = Coordinate.fromCoords(self.constraint1.x, m * self.constraint1.x + b, coord.penup)
+                    if self.isOutsideDrawingArea(ret):
+                        ret = None
+                if ret is None and self.outOfBoundsDrawingCoord.x > self.constraint2.x:
+                    ret = Coordinate.fromCoords(self.constraint2.x, m * self.constraint2.x + b, coord.penup)
+                    if self.isOutsideDrawingArea(ret):
+                        ret = None
+                if ret is None and self.outOfBoundsDrawingCoord.y < self.constraint1.y:
+                    ret = Coordinate.fromCoords((self.constraint1.y - b) / m, self.constraint1.y, coord.penup)
+                    if self.isOutsideDrawingArea(ret):
+                        ret = None
+                if ret is None and self.outOfBoundsDrawingCoord.y > self.constraint2.y:
+                    ret = Coordinate.fromCoords((self.constraint2.y - b) / m, self.constraint2.y, coord.penup)
+                    if self.isOutsideDrawingArea(ret):
+                        ret = None
         if ret is None:
             print("ConstrainDrawingRectangle: Oops - somethings went wrong {} - {} or {} : {}").format(coord, self.currentDrawingPosition, self.outOfBoundsDrawingCoord, leaving )
             print("ConstrainDrawingRectangle: constraints = {}").format(self)
