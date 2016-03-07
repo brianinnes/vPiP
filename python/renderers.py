@@ -24,8 +24,8 @@ filename = "../testImages/Vulcan.jpg"
 # filename = "../testImages/SydneyOperaNight.jpg"
 # filename = "../testImages/HamptonCourt.jpg"
 with Polargraph() as p:
-    p.setShowDrawing(True)
-    p.setPlotting(False)
+#    p.setShowDrawing(True)
+#    p.setPlotting(False)
     try:
         renderSpiralArc(filename, 10, 10, 2200, 10, p)
         renderNorwegianSpiral(filename, 2510, 10, 2200, 9.9, 10, 3, p)

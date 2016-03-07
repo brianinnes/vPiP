@@ -13,11 +13,13 @@
 # limitations under the License.
 from os.path import expanduser, isfile, exists, dirname
 from os import makedirs
-from coordinates import Coordinate, PolarCoordinate
+from .coordinates import Coordinate, PolarCoordinate
 from math import sqrt, floor
-import ConfigParser
 import errno
-
+try:
+    import configparser
+except ImportError:
+    import ConfigParser as configparser
 
 class PolarConfig:
     def __init__(self):
@@ -105,7 +107,7 @@ class PolarConfig:
         self.configFile = expanduser("~/.polargraph/config.cfg")
         print("Config is being read from %s\n" % self.configFile)
         if isfile(self.configFile):
-            config = ConfigParser.ConfigParser()
+            config = configparser.ConfigParser()
             config.read(self.configFile)
             self.configured = True
             self.penSize = config.getfloat('Polargraph', 'penSize')
@@ -279,5 +281,5 @@ class PolarConfig:
             y = sqrt((coord.leftDist * coord.leftDist) - (x * x))
             return Coordinate.fromCoords(x, y, coord.penup)
         else:
-            print "WARN: polar2systemCoords received invalid coordinate {}".format(coord)
+            print("WARN: polar2systemCoords received invalid coordinate {}").format(coord)
             return Coordinate.fromCoords(0, 0, coord.penup)

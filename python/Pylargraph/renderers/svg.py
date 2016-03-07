@@ -193,12 +193,12 @@ class NodePath(SVGElement):
         x1 = self.additionalParameter
         self.additionalParameter = None
         if x1 is None:
-            x1 = float(self.pathIterator.next())
-        y1 = float(self.pathIterator.next())
-        x2 = float(self.pathIterator.next())
-        y2 = float(self.pathIterator.next())
-        x = float(self.pathIterator.next())
-        y = float(self.pathIterator.next())
+            x1 = float(next(self.pathIterator))
+        y1 = float(next(self.pathIterator))
+        x2 = float(next(self.pathIterator))
+        y2 = floatnext((self.pathIterator))
+        x = float(next(self.pathIterator))
+        y = float(next(self.pathIterator))
         points = [(self.currentCoord.x, self.currentCoord.y),
                   (self.currentCoord.x + x1, self.currentCoord.y + y1),
                   (self.currentCoord.x + x2, self.currentCoord.y + y2),
@@ -210,12 +210,12 @@ class NodePath(SVGElement):
         x1 = self.additionalParameter
         self.additionalParameter = None
         if x1 is None:
-            x1 = float(self.pathIterator.next())
-        y1 = float(self.pathIterator.next())
-        x2 = float(self.pathIterator.next())
-        y2 = float(self.pathIterator.next())
-        x = float(self.pathIterator.next())
-        y = float(self.pathIterator.next())
+            x1 = float(next(self.pathIterator))
+        y1 = float(next(self.pathIterator))
+        x2 = float(next(self.pathIterator))
+        y2 = float(next(self.pathIterator))
+        x = float(next(self.pathIterator))
+        y = float(next(self.pathIterator))
         points = [(self.currentCoord.x, self.currentCoord.y), (x1, y1), (x2, y2), (x, y)]
         self.curveCoords(points)
         return None
@@ -224,7 +224,7 @@ class NodePath(SVGElement):
         x = self.additionalParameter
         self.additionalParameter = None
         if x is None:
-            x = float(self.pathIterator.next())
+            x = float(next(self.pathIterator))
         self.currentCoord = Coordinate.fromCoords(self.currentCoord.x + x, self.currentCoord.y, False);
         return self.currentCoord
 
@@ -232,7 +232,7 @@ class NodePath(SVGElement):
         x = self.additionalParameter
         self.additionalParameter = None
         if x is None:
-            x = float(self.pathIterator.next())
+            x = float(next(self.pathIterator))
         self.currentCoord = Coordinate.fromCoords(x, self.currentCoord.y, False);
         return self.currentCoord
 
@@ -240,8 +240,8 @@ class NodePath(SVGElement):
         x = self.additionalParameter
         self.additionalParameter = None
         if x is None:
-            x = float(self.pathIterator.next())
-        y = float(self.pathIterator.next())
+            x = float(next(self.pathIterator))
+        y = float(next(self.pathIterator))
         self.currentCoord = Coordinate.fromCoords(self.currentCoord.x + x, self.currentCoord.y + y, False);
         return self.currentCoord
 
@@ -249,8 +249,8 @@ class NodePath(SVGElement):
         x = self.additionalParameter
         self.additionalParameter = None
         if x is None:
-            x = float(self.pathIterator.next())
-        y = float(self.pathIterator.next())
+            x = float(next(self.pathIterator))
+        y = float(next(self.pathIterator))
         self.currentCoord = Coordinate.fromCoords(self.currentCoord.x, self.currentCoord.y, False);
         return self.currentCoord
 
@@ -261,8 +261,8 @@ class NodePath(SVGElement):
             x = self.additionalParameter
             self.additionalParameter = None
             if x is None:
-                x = float(self.pathIterator.next())
-            y = float(self.pathIterator.next())
+                x = float(next(self.pathIterator))
+            y = float(next(self.pathIterator))
             self.currentCoord = Coordinate.fromCoords(self.currentCoord.x + x, self.currentCoord + y, True);
         return self.currentCoord
 
@@ -270,8 +270,8 @@ class NodePath(SVGElement):
         x = self.additionalParameter
         self.additionalParameter = None
         if x is None:
-            x = float(self.pathIterator.next())
-        y = float(self.pathIterator.next())
+            x = float(next(self.pathIterator))
+        y = float(next(self.pathIterator))
         self.currentCoord = Coordinate.fromCoords(x, y, True)
         self.currentPathStartPosition = self.currentCoord
         return self.currentCoord
@@ -280,10 +280,10 @@ class NodePath(SVGElement):
         x2 = self.additionalParameter
         self.additionalParameter = None
         if x2 is None:
-            x2 = float(self.pathIterator.next())
-        y2 = float(self.pathIterator.next())
-        x = float(self.pathIterator.next())
-        y = float(self.pathIterator.next())
+            x2 = float(next(self.pathIterator))
+        y2 = float(next(self.pathIterator))
+        x = float(next(self.pathIterator))
+        y = float(next(self.pathIterator))
         if self.currentCommand in self.curveCommands:
             x1 = self.currentCoord.x + self.currentCoord.x - self.lastCurveControlPoint[0]
             y1 = self.currentCoord.y + self.currentCoord.y - self.lastCurveControlPoint[1]
@@ -301,10 +301,10 @@ class NodePath(SVGElement):
         x2 = self.additionalParameter
         self.additionalParameter = None
         if x2 is None:
-            x2 = float(self.pathIterator.next())
-        y2 = float(self.pathIterator.next())
-        x = float(self.pathIterator.next())
-        y = float(self.pathIterator.next())
+            x2 = float(next(self.pathIterator))
+        y2 = float(next(self.pathIterator))
+        x = float(next(self.pathIterator))
+        y = float(next(self.pathIterator))
         if self.currentCommand in self.curveCommands:
             x1 = self.currentCoord.x + self.currentCoord.x - self.lastCurveControlPoint[0]
             y1 = self.currentCoord.y + self.currentCoord.y - self.lastCurveControlPoint[1]
@@ -319,7 +319,7 @@ class NodePath(SVGElement):
         y = self.additionalParameter
         self.additionalParameter = None
         if y is None:
-            y = float(self.pathIterator.next())
+            y = float(next(self.pathIterator))
         self.currentCoord = Coordinate.fromCoords(self.currentCoord.x, self.currentCoord.y + y, False);
         return self.currentCoord
 
@@ -327,7 +327,7 @@ class NodePath(SVGElement):
         y = self.additionalParameter
         self.additionalParameter = None
         if y is None:
-            y = float(self.pathIterator.next())
+            y = float(next(self.pathIterator))
         self.currentCoord = Coordinate.fromCoords(self.currentCoord.x, y, False);
         return self.currentCoord
 
@@ -346,7 +346,7 @@ class NodePath(SVGElement):
             self.pathIterator = self._tokenize_path(self.d)
             while True:
                 try:
-                    command = self.pathIterator.next()
+                    command = next(self.pathIterator)
                     if not command in self.COMMANDS:
                         self.additionalParameter = float(command)
                         coord = self.svgAdditionalCoords.get(self.currentCommand)()
@@ -396,12 +396,12 @@ class NodePolyline(SVGElement):
         if self.drawingCoords is None:
             self.drawingCoords = []
             tokens = self._tokenize_path(self.points)
-            x = float(tokens.next())
-            y = float(tokens.next())
+            x = float(next(tokens))
+            y = float(next(tokens))
             self.drawingCoords.append(Coordinate.fromCoords(x, y, True))
             while True:
                 try:
-                    self.drawingCoords.append(Coordinate.fromCoords(float(tokens.next()), float(tokens.next()), False))
+                    self.drawingCoords.append(Coordinate.fromCoords(float(next(tokens)), float(next(tokens)), False))
                 except StopIteration:
                     break
                 except:
@@ -423,13 +423,13 @@ class NodePolygon(SVGElement):
         if self.drawingCoords is None:
             self.drawingCoords = []
             tokens = self._tokenize_path(self.points)
-            x = float(tokens.next())
-            y = float(tokens.next())
+            x = float(next(tokens))
+            y = float(next(tokens))
             startX, startY = x, y
             self.drawingCoords.append(Coordinate.fromCoords(x, y, True))
             while True:
                 try:
-                    self.drawingCoords.append(Coordinate.fromCoords(float(tokens.next()), float(tokens.next()), False))
+                    self.drawingCoords.append(Coordinate.fromCoords(float(next(tokens)), float(next(tokens)), False))
                 except StopIteration:
                     break
                 except:
@@ -484,7 +484,7 @@ class SVG:
         scale = float(width) / float(self.svgElement.width)
         if fit:
             scale = float(drawer.width) / float(self.svgElement.width)
-            if float(self.svgElement.height) * scale > drawer:
+            if float(self.svgElement.height) * scale > drawer.height:
                 scale = float(drawer.height) / float(self.svgElement.height)
         try:
             for c in self.drawingCoords:

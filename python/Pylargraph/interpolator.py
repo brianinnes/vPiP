@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from math import sqrt, pow, ceil
-from coordinates import Coordinate
+from .coordinates import Coordinate
 
 
 class TrapezoidInterpolater:
@@ -147,9 +147,9 @@ class TrapezoidInterpolater:
             return self.origin + (self.direction * distanceAlongMovement)
 
     def writeData(self):
-        print "Origin: {}, Dest: {}".format(self.origin, self.destination)
-        print 'Dir: {}, Slices: {}'.format(self.direction, self.slices)
-        print "Entry: {}, Cruise: {}, Exit: {}".format(self.entrySpeed, self.cruiseSpeed, self.exitSpeed)
-        print "Taccel: {}, Tcruise: {}, Tdecel: {}".format(self.accelTime, self.cruiseTime, self.decelTime)
-        print "Daccel: {}, Dcruise: {}. Ddecel: {}".format(self.accelDist, self.cruiseDist, self.decelDist)
-        print "Total distance: {}".format(self.distance)
+        print("Origin: {}, Dest: {}").format(self.origin, self.destination)
+        print('Dir: {}, Slices: {}').format(self.direction, self.slices)
+        print("Entry: {}, Cruise: {}, Exit: {}").format(self.entrySpeed, self.cruiseSpeed, self.exitSpeed)
+        print("Taccel: {}, Tcruise: {}, Tdecel: {}").format(self.accelTime, self.cruiseTime, self.decelTime)
+        print("Daccel: {}, Dcruise: {}. Ddecel: {}").format(self.accelDist, self.cruiseDist, self.decelDist)
+        print("Total distance: {}").format(self.distance)

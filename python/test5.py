@@ -23,8 +23,8 @@ filename = "../testImages/Vulcan.jpg"
 # filename = "../testImages/SydneyOperaNight.jpg"
 # filename = "../testImages/HamptonCourt.jpg"
 with Polargraph() as p:
-    p.setShowDrawing(True)
-    p.setPlotting(False)
+#    p.setShowDrawing(True)
+#    p.setPlotting(False)
     try:
         renderSpiralArc(filename, 300, 200, 600, 10, p)
         renderSpiralArc(filename, 200, 1000, 800, 15, p)

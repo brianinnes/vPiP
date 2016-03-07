@@ -11,10 +11,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from config import PolarConfig
-from coordinates import Coordinate
-from constrainDrawingRectangle import ConstrainDrawingRectangle
-from serialHandler import SerialHandler
+from .config import PolarConfig
+from .coordinates import Coordinate
+from .constrainDrawingRectangle import ConstrainDrawingRectangle
+from .serialHandler import SerialHandler
 from PIL import Image, ImageDraw
 from time import time
 
@@ -89,9 +89,9 @@ class Polargraph:
 
     def __exit__(self, tpe=None, value=None, traceback=None):
         print("Polargraph __exit__")
-        if self.drawing:
+        if self.drawing and not self.drawer is None:
             self.drawer.finishDrawing()
-        if self.config.polarDraw:
+        if self.config.polarDraw and not self.plotter is None:
             self.plotter.finishDrawing()
 
     def _start(self):

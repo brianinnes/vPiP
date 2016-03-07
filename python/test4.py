@@ -20,8 +20,8 @@ from Pylargraph.renderers.svg import renderSVG
 filename = "../testImages/Vulcan.svg"
 
 with Polargraph() as p:
-    p.setShowDrawing(True)
-    p.setPlotting(False)
+#    p.setShowDrawing(True)
+#    p.setPlotting(False)
     try:
         renderSVG(filename, 300, 200, 600, p)
         renderSVG(filename, 200, 1000, 800, p)

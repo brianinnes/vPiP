@@ -13,7 +13,7 @@
 # limitations under the License.
 import sys
 import traceback
-from coordinates import Coordinate
+from .coordinates import Coordinate
 
 
 class ConstrainDrawingRectangle:

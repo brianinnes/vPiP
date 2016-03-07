@@ -13,14 +13,16 @@
 # limitations under the License.
 import sys
 import traceback
-from Queue import Queue
 from array import array
 from threading import Thread, Event
 from serial import Serial
-from coordinates import Coordinate, PolarCoordinate
-from interpolator import TrapezoidInterpolater
+from .coordinates import Coordinate, PolarCoordinate
+from .interpolator import TrapezoidInterpolater
 from time import sleep
-
+try:
+    from Queue import Queue
+except ImportError:
+    from queue import Queue
 
 class SerialHandler:
     def __init__(self, config):
@@ -35,8 +37,8 @@ class SerialHandler:
 
     def _coordHandlerThread(self, q, stopRequest):
         print("Coord handler running\n")
-        totalLeftSteps = 0L
-        totalRightSteps = 0L
+        totalLeftSteps = 0
+        totalRightSteps = 0
         currentPenup = True
         origin = Coordinate.fromCoords(self.config.homeX,
                                        self.config.homeY,
@@ -97,7 +99,8 @@ class SerialHandler:
             try:
                 if self.serialPort.inWaiting() > 0:
                     dataRead = self.serialPort.read()
-                    for i in range(0, ord(dataRead[0]), 2):
+                    numBytes = ord(dataRead)
+                    for i in range(0, numBytes, 2):
                         if q.empty():
                             writeData[i] = 0
                             writeData[i + 1] = 0

@@ -18,6 +18,8 @@ from Pylargraph import *
 Polargraph = polargraph.Polargraph
 
 with Polargraph() as p:
+    p.setShowDrawing(True)
+    p.setPlotting(False)
     try:
         p.moveTo(0, 0)
         p.drawTo(p.config.pixels, 0)

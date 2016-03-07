@@ -23,8 +23,8 @@ filename = "../testImages/Vulcan.jpg"
 #filename = "../testImages/SydneyOperaNight.jpg"
 #test3.pyfilename = "../testImages/HamptonCourt.jpg"
 with Polargraph() as p:
-    p.setShowDrawing(True)
-    p.setPlotting(False)
+#    p.setShowDrawing(True)
+#    p.setPlotting(False)
     try:
         renderNorwegianSpiral(filename, 300, 200, 600, 9.6, 10, 3, p)
         renderNorwegianSpiral(filename, 200, 1000, 800, 9.7, 10, 3, p)

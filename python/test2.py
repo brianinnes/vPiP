@@ -19,6 +19,8 @@ from Pylargraph.generators.spiral import generateSpiral
 Polargraph = polargraph.Polargraph
 
 with Polargraph() as p:
+#    p.setShowDrawing(True)
+#    p.setPlotting(False)
     try:
         d = 100.0
         for x in range(100, 2500, 240):
