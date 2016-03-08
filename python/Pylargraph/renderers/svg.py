@@ -14,7 +14,6 @@
 import sys
 import traceback
 import re
-from __builtin__ import next
 from math import pow
 from xml.dom import minidom, Node
 from ..coordinates import Coordinate
