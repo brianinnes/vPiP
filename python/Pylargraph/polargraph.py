@@ -18,16 +18,25 @@ from .serialHandler import SerialHandler
 from PIL import Image, ImageDraw
 from time import time
 
-
-class Plotter:
+class outputter:
     def __init__(self, config):
         self.config = config
+
+    def rotateCoords(self, coord):
+        if self.config.rotate:
+            return Coordinate.fromCoords(coord.y, self.config.pixels - coord.x, coord.penup)
+        else:
+            return coord
+
+class Plotter(outputter):
+    def __init__(self, config):
+        outputter.__init__(self, config)
         self.serial = SerialHandler(self.config)
         self.serial.connect()
         self.currPosSysCoords = Coordinate.fromCoords(self.config.homeX, self.config.homeY, True)
 
     def sendCommand(self, coord):
-        coordsSystem = self.config.drawing2systemCoords(coord)
+        coordsSystem = self.config.drawing2systemCoords(self.rotateCoords(coord))
         self.serial.sendCommand(coordsSystem)
         self.currPosSysCoords = coordsSystem
 
@@ -45,20 +54,24 @@ class Plotter:
         self.serial.sendCommand(self.currPosSysCoords)
 
 
-class Drawer:
+class Drawer(outputter):
     def __init__(self, config):
-        self.config = config
+        outputter.__init__(self, config)
         self.screenImage = None
         self.screenDraw = None
-        self.screenImage = Image.new('RGB', (self.config.screenX,
-                                             self.config.heightScreen),
+        if self.config.rotate:
+            self.screenImage = Image.new('RGB', (self.config.heightScreen, self.config.screenX),
                                      (255, 255, 255, 255))  # create the image
+        else:
+            self.screenImage = Image.new('RGB', (self.config.screenX, self.config.heightScreen),
+                                     (255, 255, 255, 255))  # create the image
+
         self.screenDraw = ImageDraw.Draw(self.screenImage)
         self.currentPosition = self.config.drawing2screenCoords(
             self.config.system2drawingCoords(Coordinate.fromCoords(self.config.homeX, self.config.homeY, True)))
 
     def sendCommand(self, coord):
-        screenCoord = self.config.drawing2screenCoords(coord)
+        screenCoord = self.config.drawing2screenCoords(self.rotateCoords(coord))
         if not coord.penup:
             self.screenDraw.line([int(round(self.currentPosition.x)), int(round(self.currentPosition.y)),
                                   int(round(screenCoord.x)), int(round(screenCoord.y))], fill=(0, 0, 0))

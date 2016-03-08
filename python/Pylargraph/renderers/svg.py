@@ -14,6 +14,7 @@
 import sys
 import traceback
 import re
+from __builtin__ import next
 from math import pow
 from xml.dom import minidom, Node
 from ..coordinates import Coordinate
@@ -196,7 +197,7 @@ class NodePath(SVGElement):
             x1 = float(next(self.pathIterator))
         y1 = float(next(self.pathIterator))
         x2 = float(next(self.pathIterator))
-        y2 = floatnext((self.pathIterator))
+        y2 = float(next(self.pathIterator))
         x = float(next(self.pathIterator))
         y = float(next(self.pathIterator))
         points = [(self.currentCoord.x, self.currentCoord.y),
@@ -251,7 +252,7 @@ class NodePath(SVGElement):
         if x is None:
             x = float(next(self.pathIterator))
         y = float(next(self.pathIterator))
-        self.currentCoord = Coordinate.fromCoords(self.currentCoord.x, self.currentCoord.y, False);
+        self.currentCoord = Coordinate.fromCoords(x, y, False);
         return self.currentCoord
 
     def relativeMove(self):

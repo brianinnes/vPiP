@@ -141,6 +141,8 @@ class PolarConfig:
             self.configured = False
             self.createDefaultConfig()
             self.loadConfig()
+        if self.rotate:
+            self.width, self.height = self.height, self.width
         self.stepsSizeMM = (1.0 / self.stepsPerRev / self.stepMultiplier) * self.mmPerRev
         stepsPerRevolution = self.stepsPerRev * self.stepMultiplier
         self.stepsPerValue = self.stepsMaxValue / self.stepMultiplier
@@ -234,8 +236,6 @@ class PolarConfig:
                 config.write(configfile)
         else:
             print('ERROR-Trying to write configuration when unconfigured!')
-
-        # @TODO - add rotate feature
 
     def system2drawingCoords(self, coord):
         """
