@@ -256,15 +256,16 @@ class NodePath(SVGElement):
         return self.currentCoord
 
     def relativeMove(self):
-        if self.currentPathStartPosition is None:
-            self.move()
+        if self.currentCoord is None:
+            return self.move()
         else:
             x = self.additionalParameter
             self.additionalParameter = None
             if x is None:
                 x = float(next(self.pathIterator))
             y = float(next(self.pathIterator))
-            self.currentCoord = Coordinate.fromCoords(self.currentCoord.x + x, self.currentCoord + y, True);
+            self.currentCoord = Coordinate.fromCoords(self.currentCoord.x + x, self.currentCoord.y + y, True)
+            self.currentPathStartPosition = self.currentCoord
         return self.currentCoord
 
     def move(self):
@@ -334,7 +335,6 @@ class NodePath(SVGElement):
 
     def closePath(self):
         self.currentCoord = Coordinate.fromCoords(self.currentPathStartPosition.x, self.currentPathStartPosition.y, False)
-        self.currentPathStartPosition = None
         return self.currentCoord
 
     def unknownCommand(self):
