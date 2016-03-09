@@ -42,10 +42,10 @@ class SpiralArc:
         self.logPixmax = log10(self.pixmax)
         self.centre = centre
         self.centres = {
-            "NE": (self.drawer.width, 0),
-            "SE": (self.drawer.width, self.drawer.height),
-            "SW": (0, self.drawer.height),
-            "NW": (0, 0)
+            "NE": (width + x, y),
+            "SE": (width + x, height + y),
+            "SW": (x, height + y),
+            "NW": (x, y)
         }
         self.angles = {
             "NE": (0.5, pi),
@@ -57,8 +57,8 @@ class SpiralArc:
 
 
     def scaleDownCoords(self, pt):
-        x = int(float(pt[0]) / self.imageScaling)
-        y = int(float(pt[1]) / self.imageScaling)
+        x = int(float(pt[0] - self.offSetX) / self.imageScaling)
+        y = int(float(pt[1] - self.offSetY) / self.imageScaling)
         if x > self.imgWidth - 1:
             x = self.imgWidth - 1
         if y > self.imgHeight - 1:
@@ -80,10 +80,10 @@ class SpiralArc:
                 return (log10(cpixel) - self.logPixmin) / (self.logPixmax - self.logPixmin)
 
     def p2c(self, r, phi):
-        return (r * cos(phi), r * sin(phi))
+        return (r * cos(phi) + self.centres[self.centre][0], r * sin(phi) + self.centres[self.centre][1])
 
     def positionDrawingCoords(self, p):
-        return (p[0] + self.offSetX, p[1] + self.offSetY)
+        return (p[0], p[1])
 
     def arcGenerator(self):
         self.direction = 1
@@ -134,6 +134,6 @@ class SpiralArc:
 
 
 
-def renderSpiralArc(fileName, x, y, width, resolution, drawer):
-    generator = SpiralArc(fileName, x, y, width, drawer, resolution)
+def renderSpiralArc(fileName, x, y, width, resolution, drawer, centre="NW"):
+    generator = SpiralArc(fileName, x, y, width, drawer, resolution, centre)
     generator.generateCoordinates()
