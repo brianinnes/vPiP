@@ -15,28 +15,31 @@ import sys
 import traceback
 from array import array
 from threading import Thread, Event
+from multiprocessing import Process, Event, JoinableQueue
 from serial import Serial
 from .coordinates import Coordinate, PolarCoordinate
 from .interpolator import TrapezoidInterpolater
 from time import sleep
-try:
-    from Queue import Queue
-except ImportError:
-    from queue import Queue
+#try:
+#    from Queue import Queue
+#except ImportError:
+#    from queue import Queue
 
 class SerialHandler:
     def __init__(self, config):
         self.config = config
-        self.coordQueue = Queue()
-        self.stepQueue = Queue()
+        self.coordQueue = JoinableQueue()
+        self.stepQueue = JoinableQueue()
         self.connected = False
-        self.stopRequest = Event()
+        self.stopRequestCoord = Event()
+        self.stopRequestStep = Event()
+        self.startedCoord = Event()
+        self.startedStepWorker = Event()
         self.serialPort = None
         self.coordWorker = None
         self.stepWorker = None
 
-    def _coordHandlerThread(self, q, stopRequest):
-        print("Coord handler running\n")
+    def _coordHandlerThread(self, q, sq, stopRequest, stopRequestStep, started):
         totalLeftSteps = 0
         totalRightSteps = 0
         currentPenup = True
@@ -50,10 +53,11 @@ class SerialHandler:
 
         interp = TrapezoidInterpolater()
 
+        started.set()
         target = q.get()
         q.task_done()
 
-        while (not q.empty()) or (not stopRequest.isSet()):
+        while (not q.empty()) or (not stopRequest.is_set()):
             try:
                 if q.empty():
                     nextTarget = target
@@ -62,11 +66,11 @@ class SerialHandler:
                     q.task_done()
                 if target.penup != currentPenup:
                     if target.penup:
-                        self.stepQueue.put(self.config.penUpCommand)
-                        self.stepQueue.put(self.config.penUpCommand)
+                        sq.put(self.config.penUpCommand)
+                        sq.put(self.config.penUpCommand)
                     else:
-                        self.stepQueue.put(self.config.penDownCommand)
-                        self.stepQueue.put(self.config.penDownCommand)
+                        sq.put(self.config.penDownCommand)
+                        sq.put(self.config.penDownCommand)
                     currentPenup = target.penup
                 interp.setup(self.config, origin, target, nextTarget)
                 for timeSlice in range(1, interp.slices + 1):
@@ -78,8 +82,8 @@ class SerialHandler:
                     rs = int(-sliceSteps.rightDist)
                     totalLeftSteps += ls
                     totalRightSteps -= rs
-                    self.stepQueue.put(ls)
-                    self.stepQueue.put(rs)
+                    sq.put(ls)
+                    sq.put(rs)
                     prevPolarPos = polarHome + PolarCoordinate.fromCoords(totalLeftSteps * scalefactor,
                                                                           totalRightSteps * scalefactor, target.penup)
                 origin = self.config.polar2systemCoords(prevPolarPos)
@@ -89,13 +93,14 @@ class SerialHandler:
                 exc_type, exc_value, exc_traceback = sys.exc_info()
                 print("Coord handler thread exception : %s" % exc_type)
                 traceback.print_tb(exc_traceback, limit=2, file=sys.stdout)
+        stopRequestStep.set()
 
-    def _stepHandlerThread(self, q, stopRequest):
-        print("Step handler running\n")
+    def _stepHandlerThread(self, q, stopRequest, started):
+        started.set()
         writeData = array('b')
         for i in range(0, 128):
             writeData.append(0)
-        while (not q.empty()) or (not stopRequest.isSet()):
+        while (not q.empty()) or (not stopRequest.is_set()):
             try:
                 if self.serialPort.inWaiting() > 0:
                     dataRead = self.serialPort.read()
@@ -120,15 +125,19 @@ class SerialHandler:
 
     def connect(self):
         self.serialPort = Serial(self.config.serialPort, self.config.baud, timeout=10)
-        self.coordWorker = Thread(target=self._coordHandlerThread, args=(self.coordQueue, self.stopRequest,))
+#        self.coordWorker = Thread(target=self._coordHandlerThread, args=(self.coordQueue, self.stopRequest, self.startedCoord,))
+        self.coordWorker = Process(target=self._coordHandlerThread, args=(self.coordQueue, self.stepQueue, self.stopRequestCoord, self.stopRequestStep, self.startedCoord, ))
         self.coordWorker.start()
-        self.stepWorker = Thread(target=self._stepHandlerThread, args=(self.stepQueue, self.stopRequest,))
+#        self.stepWorker = Thread(target=self._stepHandlerThread, args=(self.stepQueue, self.stopRequest, self.startedStepWorker,))
+        self.stepWorker = Process(target=self._stepHandlerThread, args=(self.stepQueue, self.stopRequestStep, self.startedStepWorker, ))
         self.stepWorker.start()
+        while (not self.startedCoord.is_set()) or (not self.startedStepWorker.is_set()):
+            sleep(0)
         self.connected = True
         print("Connected to Polargraph")
 
     def disconnect(self):
-        self.stopRequest.set()
+        self.stopRequestCoord.set()
         self.coordQueue.join()
         self.stepQueue.join()
         self.coordWorker.join()
