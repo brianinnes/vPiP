@@ -16,10 +16,12 @@ from os import makedirs
 from .coordinates import Coordinate, PolarCoordinate
 from math import sqrt, floor
 import errno
+
 try:
     import configparser
 except ImportError:
     import ConfigParser as configparser
+
 
 class PolarConfig:
     def __init__(self):
@@ -151,51 +153,52 @@ class PolarConfig:
         self.AccelerationMMs2 = self.MaxSpeedMMs / self.motorAccel
         self.pixelsPerMM = float(self.pixels) / (self.width - 2 * self.margin)
         self.heightPixels = int(floor(float(self.height - 2 * self.margin) * self.pixelsPerMM))
-        self.heightScreen = int(floor(float(self.heightPixels) * self.screenX/self.pixels))
+        self.heightScreen = int(floor(float(self.heightPixels) * self.screenX / self.pixels))
 
     def createDefaultConfig(self):
-        config = ConfigParser.ConfigParser()
+        config = configparser.ConfigParser()
         config.add_section('Polargraph')
-        config.set('Polargraph', 'penSize', '0.0')
-        config.set('Polargraph', 'machineWidth', '0')
-        config.set('Polargraph', 'machineHeight', '0')
-        config.set('Polargraph', 'mmPerRev', '0.0')
-        config.set('Polargraph', 'stepsPerRev', '0')
-        config.set('Polargraph', 'stepMultiplier', '0')
+        config.set('Polargraph', 'penSize', '1.0')
+        config.set('Polargraph', 'machineWidth', '1')
+        config.set('Polargraph', 'machineHeight', '1')
+        config.set('Polargraph', 'mmPerRev', '1.0')
+        config.set('Polargraph', 'stepsPerRev', '1')
+        config.set('Polargraph', 'stepMultiplier', '1')
         config.set('Polargraph', 'serialPort', 'none')
-        config.set('Polargraph', 'timeSliceUS', 0.0)
-        config.set('Polargraph', 'baud', '0')
-        config.set('Polargraph', 'motorAccel', '0.0')
-        config.set('Polargraph', 'motorMaxSpeed', '0.0')
+        config.set('Polargraph', 'timeSliceUS', '1.0')
+        config.set('Polargraph', 'baud', '57600')
+        config.set('Polargraph', 'motorAccel', '1.0')
+        config.set('Polargraph', 'motorMaxSpeed', '1.0')
         config.set('Polargraph', 'penUp', '0')
         config.set('Polargraph', 'penDown', '0')
         config.set('Polargraph', 'homeX', '0')
         config.set('Polargraph', 'homeY', '0')
-        config.set('Polargraph', 'polarDraw', True)
+        config.set('Polargraph', 'polarDraw', 'True')
         config.add_section('Paper')
         config.set('Paper', 'size', 'custom')
-        config.set('Paper', 'width', 0)
-        config.set('Paper', 'height', 0)
-        config.set('Paper', 'posX', 0)
-        config.set('Paper', 'posY', 0)
-        config.set('Paper', 'margin', 0)
-        config.set('Paper', 'pixels', 0)
-        config.set('Paper', 'rotate', False)
-        config.set('Screen', 'screenX', 0)
-        config.set('Screen', 'showImage', False)
-        config.set('Screen', 'saveImage', False)
+        config.set('Paper', 'width', '1')
+        config.set('Paper', 'height', '1')
+        config.set('Paper', 'posX', '1')
+        config.set('Paper', 'posY', '1')
+        config.set('Paper', 'margin', '1')
+        config.set('Paper', 'pixels', '1')
+        config.set('Paper', 'rotate', 'False')
+        config.add_section('Screen')
+        config.set('Screen', 'screenX', '1')
+        config.set('Screen', 'showImage', 'False')
+        config.set('Screen', 'saveImage', 'False')
         if not exists(dirname(self.configFile)):
             try:
                 makedirs(dirname(self.configFile))
             except OSError as exc:  # Guard against race condition
                 if exc.errno != errno.EEXIST:
                     raise
-        with open(self.configFile, 'wb') as configfile:
+        with open(self.configFile, 'w') as configfile:
             config.write(configfile)
 
     def writeConfig(self):
         if self.configured:
-            config = ConfigParser.ConfigParser()
+            config = configparser.ConfigParser()
             config.add_section('Polargraph')
             config.set('Polargraph', 'penSize', self.penSize)
             config.set('Polargraph', 'machineWidth', self.machineWidth)
@@ -232,7 +235,7 @@ class PolarConfig:
                 except OSError as exc:  # Guard against race condition
                     if exc.errno != errno.EEXIST:
                         raise
-            with open(self.configFile, 'wb') as configfile:
+            with open(self.configFile, 'w') as configfile:
                 config.write(configfile)
         else:
             print('ERROR-Trying to write configuration when unconfigured!')
@@ -242,7 +245,7 @@ class PolarConfig:
         :param coord:
         :rtype: Coordinate
         """
-        mmCoord = coord.translate(self.posX - self.margin, self.posY  - self.margin)
+        mmCoord = coord.translate(self.posX - self.margin, self.posY - self.margin)
         return mmCoord * self.pixelsPerMM
 
     def drawing2systemCoords(self, coord):
@@ -258,7 +261,7 @@ class PolarConfig:
         :type coord: Coordinate
         :rtype: Coordinate
         """
-        return coord*self.screenX/self.pixels
+        return coord * self.screenX / self.pixels
 
     def system2polarCoords(self, coord):
         """
