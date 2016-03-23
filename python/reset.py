@@ -11,9 +11,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from Pylargraph import *
+from pyPlotter import *
 
-Polargraph = polargraph.Polargraph
+PyPlotter = pyPlotter.PyPlotter
 
-with Polargraph() as p:
+with PyPlotter() as p:
     p.penUp()

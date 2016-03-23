@@ -13,17 +13,17 @@
 # limitations under the License.
 import sys
 import traceback
-from Pylargraph import *
-from Pylargraph.renderers.spiralArcRenderer import renderSpiralArc
-from Pylargraph.renderers.norwegianSpiral import renderNorwegianSpiral
-Polargraph = polargraph.Polargraph
+from pyPlotter import *
+from pyPlotter.renderers.spiralArcRenderer import renderSpiralArc
+from pyPlotter.renderers.norwegianSpiral import renderNorwegianSpiral
+PyPlotter = pyPlotter.PyPlotter
 
 filename = "../testImages/Vulcan.jpg"
 # filename = "../testImages/TyneBridge.jpg"
 # filename = "../testImages/SydneyOpera.jpg"
 # filename = "../testImages/SydneyOperaNight.jpg"
 # filename = "../testImages/HamptonCourt.jpg"
-with Polargraph() as p:
+with PyPlotter() as p:
 #    p.setShowDrawing(True)
 #    p.setPlotting(False)
     try:

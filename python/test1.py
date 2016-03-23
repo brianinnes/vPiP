@@ -13,11 +13,11 @@
 # limitations under the License.
 import sys
 import traceback
-from Pylargraph import *
+from pyPlotter import *
 
-Polargraph = polargraph.Polargraph
+PyPlotter = pyPlotter.PyPlotter
 
-with Polargraph() as p:
+with PyPlotter() as p:
     p.setShowDrawing(True)
     p.setPlotting(False)
     try:

@@ -134,7 +134,7 @@ class SerialHandler:
         while (not self.startedCoord.is_set()) or (not self.startedStepWorker.is_set()):
             sleep(0)
         self.connected = True
-        print("Connected to Polargraph")
+        print("Connected to PyPlotter")
 
     def disconnect(self):
         self.stopRequestCoord.set()

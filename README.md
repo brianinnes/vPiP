@@ -1,14 +1,13 @@
-# pycupi
-Driving a drawing machine
+# pyPlotter
+Driving a drawing machine from python
 
-A python library with accompanying Arduino code, based on the gocupi project.  This port has been modified to run on the driver board created by makeBournemouth
+A python library targetted to run on a Raspberry Pi with accompanying Arduino code.  This code is intended to run on the driver board created by makeBournemouth
 
 Links:  
 
 - makeBournemouth [https://www.makebournemouth.com]()
-- Controller board : [https://github.com/MarkJB/Eggbot-Spherebot-Polargraph-Controller]()
--  gocupi : [https://github.com/brandonagr/gocupi]()
+- Controller board : [https://github.com/MarkJB/Eggbot-Spherebot-PyPlotter-Controller]()
 
-Want to know what a Polargraph machine is?  [http://www.polargraph.co.uk]()
+Inspired by the Polargraph project [http://www.polargraph.co.uk]() and gocupi project [https://github.com/brandonagr/gocupi]()
 
 To run this library you need Python installed with the Python Imaging Library fork, Pillow.  Installation instructions are here : [https://pillow.readthedocs.org/en/latest/installation.html]()

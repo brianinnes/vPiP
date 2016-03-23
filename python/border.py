@@ -13,11 +13,11 @@
 # limitations under the License.
 import sys
 import traceback
-from Pylargraph import *
+from pyPlotter import *
 
-Polargraph = polargraph.Polargraph
+PyPlotter = pyPlotter.PyPlotter
 
-with Polargraph() as p:
+with PyPlotter() as p:
     try:
         p.moveTo(0, 0)
         p.drawTo(p.config.pixels, 0)

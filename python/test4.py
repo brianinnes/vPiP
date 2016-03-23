@@ -13,13 +13,13 @@
 # limitations under the License.
 import sys
 import traceback
-from Pylargraph.polargraph import Polargraph, ConstrainDrawingRectangle
-from Pylargraph.renderers.svg import renderSVG
+from pyPlotter.pyPlotter import PyPlotter, ConstrainDrawingRectangle
+from pyPlotter.renderers.svg import renderSVG
 
 
 filename = "../testImages/Vulcan.svg"
 
-with Polargraph() as p:
+with PyPlotter() as p:
 #    p.setShowDrawing(True)
 #    p.setPlotting(False)
     try:
