@@ -1,7 +1,7 @@
 # pycupi
-Driving a Polargraph machine
+Driving a drawing machine
 
-A python library with accompanying Arduino code, based on the gocupi project.  This port has been modified to run on the Polargraph driver board created by makeBournemouth
+A python library with accompanying Arduino code, based on the gocupi project.  This port has been modified to run on the driver board created by makeBournemouth
 
 Links:  
 
