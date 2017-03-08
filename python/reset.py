@@ -11,9 +11,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from pyPlotter import *
+from vPiP import *
 
-PyPlotter = pyPlotter.PyPlotter
+Vpip = vPiP.Vpip
 
-with PyPlotter() as p:
+with Vpip() as p:
     p.penUp()

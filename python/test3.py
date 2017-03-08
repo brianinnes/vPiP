@@ -13,16 +13,16 @@
 # limitations under the License.
 import sys
 import traceback
-from pyPlotter import *
-from pyPlotter.renderers.norwegianSpiral import renderNorwegianSpiral
-PyPlotter = pyPlotter.PyPlotter
+from vPiP import *
+from vPiP.renderers.norwegianSpiral import renderNorwegianSpiral
+Vpip = vPiP.Vpip
 
-filename = "../testImages/Vulcan.jpg"
+# filename = "../testImages/Vulcan.jpg"
 #filename = "../testImages/TyneBridge.jpg"
 #filename = "../testImages/SydneyOpera.jpg"
 #filename = "../testImages/SydneyOperaNight.jpg"
-#test3.pyfilename = "../testImages/HamptonCourt.jpg"
-with PyPlotter() as p:
+filename = "../testImages/HamptonCourt.jpg"
+with Vpip() as p:
 #    p.setShowDrawing(True)
 #    p.setPlotting(False)
     try:

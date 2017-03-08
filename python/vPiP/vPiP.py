@@ -85,12 +85,12 @@ class Drawer(outputter):
             self.screenImage.save(''.join(('{}'.format(int(round(time() * 1000))), ".jpg")), "JPEG", optimize=True)
 
 
-class PyPlotter:
+class Vpip:
     def __enter__(self):
         return self
 
     def __init__(self):
-        print("PyPlotter __init__")
+        print("Vpip __init__")
         self.config = PolarConfig()
         self.plotter = None
         self.drawer = None
@@ -101,7 +101,7 @@ class PyPlotter:
         self.height = self.config.heightPixels
 
     def __exit__(self, tpe=None, value=None, traceback=None):
-        print("PyPlotter __exit__")
+        print("Vpip __exit__")
         if self.drawing and not self.drawer is None:
             self.drawer.finishDrawing()
         if self.config.polarDraw and not self.plotter is None:

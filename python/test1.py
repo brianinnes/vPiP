@@ -13,11 +13,11 @@
 # limitations under the License.
 import sys
 import traceback
-from pyPlotter import *
+from vPiP import *
 
-PyPlotter = pyPlotter.PyPlotter
+Vpip = vPiP.Vpip
 
-with PyPlotter() as p:
+with Vpip() as p:
     p.setShowDrawing(True)
     p.setPlotting(False)
     try:

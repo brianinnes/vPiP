@@ -13,13 +13,13 @@
 # limitations under the License.
 import sys
 import traceback
-from pyPlotter.pyPlotter import PyPlotter, ConstrainDrawingRectangle
-from pyPlotter.renderers.svg import renderSVG
+from vPiP.vPiP import Vpip, ConstrainDrawingRectangle
+from vPiP.renderers.svg import renderSVG
 
 
 filename = "../testImages/Vulcan.svg"
 
-with PyPlotter() as p:
+with Vpip() as p:
 #    p.setShowDrawing(True)
 #    p.setPlotting(False)
     try:

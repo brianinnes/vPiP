@@ -13,16 +13,16 @@
 # limitations under the License.
 import sys
 import traceback
-from pyPlotter import *
-from pyPlotter.renderers.spiralArcRenderer import renderSpiralArc
-PyPlotter = pyPlotter.PyPlotter
+from vPiP import *
+from vPiP.renderers.spiralArcRenderer import renderSpiralArc
+Vpip = vPiP.Vpip
 
 filename = "../testImages/Vulcan.jpg"
 # filename = "../testImages/TyneBridge.jpg"
 # filename = "../testImages/SydneyOpera.jpg"
 # filename = "../testImages/SydneyOperaNight.jpg"
 # filename = "../testImages/HamptonCourt.jpg"
-with PyPlotter() as p:
+with Vpip() as p:
 #    p.setShowDrawing(True)
 #    p.setPlotting(False)
     try:

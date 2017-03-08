@@ -1,7 +1,7 @@
-# pyPlotter
+# vPiP
 Driving a drawing machine from python
 
-A python library targetted to run on a Raspberry Pi with accompanying Arduino code.  This code is intended to run on the driver board created by makeBournemouth
+A python library targeted to run on a Raspberry Pi with accompanying Arduino code.  This code is intended to run on the driver board created by makeBournemouth
 
 Links:  
 

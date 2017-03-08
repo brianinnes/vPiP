@@ -13,12 +13,12 @@
 # limitations under the License.
 import sys
 import traceback
-from pyPlotter import *
-from pyPlotter.generators.spiral import generateSpiral
+from vPiP import *
+from vPiP.generators.spiral import generateSpiral
 
-PyPlotter = pyPlotter.PyPlotter
+Vpip = vPiP.Vpip
 
-with PyPlotter() as p:
+with Vpip() as p:
 #    p.setShowDrawing(True)
 #    p.setPlotting(False)
     try:
