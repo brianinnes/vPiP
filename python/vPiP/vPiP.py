@@ -164,14 +164,24 @@ class Vpip:
                 self.drawerConstraint = None
 
     def setPlotting(self, setting):
-        self.config.polarDraw = setting
-        if self.config.polarDraw:
-            self.plotter = Plotter(self.config)
-            self.plotterConstraint = ConstrainDrawingRectangle(0, 0, self.config.pixels, self.config.heightPixels,
-                                                               self.plotter)
-        else:
-            self.plotter = None
-            self.plotterConstraint = None
+        if setting != self.config.polarDraw:
+            if setting:
+                self.plotter = Plotter(self.config)
+                self.plotterConstraint = ConstrainDrawingRectangle(0, 0, self.config.pixels, self.config.heightPixels,
+                                                                   self.plotter)
+            else:
+                self.plotter = None
+                self.plotterConstraint = None
+            self.config.polarDraw = setting
+
+        # self.config.polarDraw = setting
+        # if self.config.polarDraw:
+        #     self.plotter = Plotter(self.config)
+        #     self.plotterConstraint = ConstrainDrawingRectangle(0, 0, self.config.pixels, self.config.heightPixels,
+        #                                                        self.plotter)
+        # else:
+        #     self.plotter = None
+        #     self.plotterConstraint = None
 
 
     # High level drawing functions
