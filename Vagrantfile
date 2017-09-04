@@ -65,7 +65,7 @@ Vagrant.configure("2") do |config|
     v.customize ["modifyvm", :id, "--usb", "on"]
     v.customize ["modifyvm", :id, "--usbxhci", "on"]
   end
-  config.vm.box = "debian/jessie64"
+  config.vm.box = "debian/stretch64"
 #--------
 # If larger filesystem is needed use the image in the commented out line below
 # rather than the debian/jessie64 image
@@ -83,10 +83,13 @@ Vagrant.configure("2") do |config|
     apt-get install -y build-essential curl python-pip python-dev unzip git usbutils
     apt-get install -y libusb-1.0 libusb-dev libelf-dev libftdi-dev
     apt-get install -y avahi-daemon avahi-discover avahi-dnsconfd avahi-utils libnss-mdns
-    apt-get install -y libssl-dev autoconf libtool
+    apt-get install -y libssl-dev autoconf libtool sbuild
+    sbuild-adduser $LOGNAME
+    `newgrp sbuild`
+    sbuild-update --keygen
     echo "********** Installing ARM 7 build tools **********"
-    echo "deb http://emdebian.org/tools/debian/ jessie main" >> /etc/apt/sources.list.d/crosstools.list
-    curl http://emdebian.org/tools/debian/emdebian-toolchain-archive.key | sudo apt-key add -
+# echo "deb http://emdebian.org/tools/debian/ jessie main" >> /etc/apt/sources.list.d/crosstools.list
+# curl http://emdebian.org/tools/debian/emdebian-toolchain-archive.key | sudo apt-key add -
     dpkg --add-architecture armhf
     apt-get update
     apt-get install -y crossbuild-essential-armhf
@@ -133,7 +136,7 @@ EOF
     ln ../links.rules 10-links.rules
     systemctl restart udev
     udevadm control --reload-rules; udevadm trigger
-    cd /vagrant
+    cd /tmp
     echo "********** Installing Paho MQTT C library **********"
     git clone https://github.com/openssl/openssl.git
     git clone https://github.com/eclipse/paho.mqtt.c.git
@@ -188,7 +191,10 @@ EOF
     ln -s libpaho-mqtt3a.so.1.0 /usr/local/lib/arm6-linux-gnueabihf-gcc/libpaho-mqtt3a.so.1
     ln -s libpaho-mqtt3as.so.1.0 /usr/local/lib/arm6-linux-gnueabihf-gcc/libpaho-mqtt3as.so.1
     export CC=$CC_ORG
+    echo "******************************************************"
     echo "********** Installing Paho MQTT C++ library **********"
+    echo "******************************************************"
+    echo "********** ARM7 **********"
     cd ../paho.mqtt.cpp
     if [ -d lib_arm ]; then
       rm -rf lib_arm
