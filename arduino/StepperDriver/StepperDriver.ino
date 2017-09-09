@@ -1,53 +1,41 @@
-/*
-  Gocupi Arduino Code
-  Reads movement commands over serial and controls two stepper motors 
-*/
+#include <Wire.h>
 
 // comment out to disable PENUP support
 #define ENABLE_PENUP
 
-// Constants and global variables
-// --------------------------------------
-const int LED_PINS_COUNT = 4;
-const int LED_PINS[LED_PINS_COUNT] = {
-  10,11,12,13}; // the pins of all of the leds, first 3 are status lights, 4th is receive indicator
-#define MOTOR_ENABLE_PIN 9
-const int LEFT_STEP_PIN = 3;
-const int LEFT_DIR_PIN = 2;
-const int RIGHT_STEP_PIN = 5;
-const int RIGHT_DIR_PIN = 4;
-//Set micro stepping pins here
-#define M0_PIN 8
-#define M1_PIN 7
-#define M2_PIN 6
+#define I2C_ADDRESS 8
 
-//Set the micro stepping level here (Defaulting to 1/16th as that doesn't require modification to Processing Control app source to support 1/32nd)
-//DRV8825 Microstepping configuration
-//
-// M0  M1  M2  STEP MODE
-// 0   0   0   Full step (2-phase excitation) with 71% current
-// 1   0   0   1/2 step (1-2 phase excitation)
-// 0   1   0   1/4 step (W1-2 phase excitation)
-// 1   1   0   8 microsteps/step
-// 0   0   1   16 microsteps/step
-// 1   0   1   32 microsteps/step
-// 0   1   1   32 microsteps/step
-// 1   1   1   32 microsteps/step
-#define M0_STEP HIGH
-#define M1_STEP HIGH
-#define M2_STEP LOW
-
+struct config_t {
+    struct pins_t {
+        unsigned char stepperEnable;
+        unsigned char leftStep;
+        unsigned char rightStep;
+        unsigned char leftDir;
+        unsigned char rightDir;
+        unsigned char microSteppingM0;
+        unsigned char microSteppingM1;
+        unsigned char microSteppingM2;
+        unsigned char penServo;
+        unsigned char leftStopSense;
+        unsigned char rightStopSense;
+    } pins;
+    unsigned char penUpAngle;
+    unsigned char penDownAngle;
+    bool autohome;
+    unsigned char microSteppingM0;
+    unsigned char microSteppingM1;
+    unsigned char microSteppingM2;
+    short senseTimeout;
+    short senseTrigger;
+} controllerConfig;
 
 #ifdef ENABLE_PENUP
 #include <Servo.h>
 Servo penUpServo;
 char penTransitionDirection; // -1, 0, 1
-const int PENUP_SERVO_PIN = 14;
 const long PENUP_TRANSITION_US = 524288; // time to go from pen up to down, or down to up
 const int PENUP_TRANSITION_US_LOG = 19; // 2^19 = 524288
 const long PENUP_COOLDOWN_US = 1250000;
-const long PENUP_ANGLE = 170;
-const long PENDOWN_ANGLE = 85;
 #endif
 
 const unsigned int TIME_SLICE_US = 2048; // number of microseconds per time step
@@ -59,11 +47,11 @@ const char RESET_COMMAND = 0x80; // -128, (128) command to reset
 const char PENUP_COMMAND = 0x81; // -127, (129) command to lift pen
 const char PENDOWN_COMMAND = 0x7F; // 127,(127) command to lower pen
 
-const unsigned int MOVE_DATA_CAPACITY = 1024;
+const unsigned char MOVE_DATA_CAPACITY = 255;
 char moveData[MOVE_DATA_CAPACITY]; // buffer of move data, circular buffer
-unsigned int moveDataStart = 0; // where data is currently being read from
-unsigned int moveDataLength = 0; // the number of items in the moveDataBuffer
-unsigned int moveDataRequestPending = 0; // number of bytes requested
+unsigned char moveDataStart = 0; // where data is currently being read from
+unsigned char moveDataLength = 0; // the number of items in the moveDataBuffer
+unsigned char moveDataRequestPending = 0; // number of bytes requested
 
 char leftDelta, rightDelta; // delta in the current slice
 long leftStartPos, rightStartPos; // start position for this slice
@@ -72,46 +60,103 @@ long leftCurPos, rightCurPos; // current position of the spools
 unsigned long curTime; // current time in microseconds
 unsigned long sliceStartTime; // start of current slice in microseconds
 
+void receiveI2CEvent(int count);
+void requestI2CEvent();
 
 // setup
 // --------------------------------------
 void setup() {
   Serial.begin(57600);
-  Serial.setTimeout(0);
 
-  // setup pins
-  for(int ledIndex = 0; ledIndex < LED_PINS_COUNT; ledIndex++) {
-    pinMode(LED_PINS[ledIndex], OUTPUT);
-    digitalWrite(LED_PINS[ledIndex], HIGH);
-  }
-
-  pinMode(M0_PIN, OUTPUT);
-  pinMode(M1_PIN, OUTPUT);
-  pinMode(M2_PIN, OUTPUT);
-  digitalWrite(M0_PIN, M0_STEP);
-  digitalWrite(M1_PIN, M1_STEP);
-  digitalWrite(M2_PIN, M2_STEP);
-    
-  pinMode(LEFT_STEP_PIN, OUTPUT);
-  pinMode(LEFT_DIR_PIN, OUTPUT);
-  pinMode(RIGHT_STEP_PIN, OUTPUT);
-  pinMode(RIGHT_DIR_PIN, OUTPUT);	
-  pinMode(MOTOR_ENABLE_PIN, OUTPUT);
-  digitalWrite(MOTOR_ENABLE_PIN, LOW);
-#ifdef ENABLE_PENUP
-  penUpServo.attach(PENUP_SERVO_PIN);
-  penUpServo.write(PENUP_ANGLE);
-  delay(1000);
-  penUpServo.write(PENDOWN_ANGLE);
-  delay(1000);
-  penUpServo.write(PENUP_ANGLE);
-#endif  
-
+  // Start I2C connection
+  Wire.begin(I2C_ADDRESS);
+  Wire.onReceive(receiveI2CEvent);
+  Wire.onRequest(requestI2CEvent);
   ResetMovementVariables();
 
-  delay(500);
-  UpdateReceiveLed(false);
-  UpdateStatusLeds(0);
+  Serial.println("Stepper Driver");
+}
+
+void readConfiguration() {
+  int length = sizeof(controllerConfig);
+  unsigned char *buff = (void *)&controllerConfig;
+  for (int i = 0; i < length; i++) {
+    if (Wire.available()) {
+      buff[i] = Wire.read();
+    }
+  }
+
+  pinMode(controllerConfig.pins.microSteppingM0, OUTPUT);
+  pinMode(controllerConfig.pins.microSteppingM1, OUTPUT);
+  pinMode(controllerConfig.pins.microSteppingM2, OUTPUT);
+  digitalWrite(controllerConfig.pins.microSteppingM0, controllerConfig.microSteppingM0);
+  digitalWrite(controllerConfig.pins.microSteppingM1, controllerConfig.microSteppingM1);
+  digitalWrite(controllerConfig.pins.microSteppingM2, controllerConfig.microSteppingM2);
+
+  pinMode(controllerConfig.pins.leftStep, OUTPUT);
+  pinMode(controllerConfig.pins.leftDir, OUTPUT);
+  pinMode(controllerConfig.pins.rightStep, OUTPUT);
+  pinMode(controllerConfig.pins.rightDir, OUTPUT);
+  pinMode(controllerConfig.pins.stepperEnable, OUTPUT);
+  digitalWrite(controllerConfig.pins.stepperEnable, LOW);
+
+  pinMode(controllerConfig.pins.leftStopSense, OUTPUT);
+  pinMode(controllerConfig.pins.rightStopSense, OUTPUT);
+  digitalWrite(controllerConfig.pins.leftStopSense, HIGH);
+  digitalWrite(controllerConfig.pins.rightStopSense, HIGH);
+#ifdef ENABLE_PENUP
+  penUpServo.attach(controllerConfig.pins.penServo);
+  penUpServo.write(controllerConfig.penUpAngle);
+  delay(1000);
+  penUpServo.write(controllerConfig.penDownAngle);
+  delay(1000);
+  penUpServo.write(controllerConfig.penUpAngle);
+  penTransitionDirection = 0;
+#endif
+  if (controllerConfig.autohome) {
+    digitalWrite(controllerConfig.pins.stepperEnable, LOW);
+    AutoHome();
+  }
+}
+
+void receiveDataByte() {
+  unsigned char dataByte = 0;
+  if (Wire.available()) {
+    dataByte = Wire.read();
+    MoveDataPut(dataByte);
+  }
+}
+
+void readDataBlock() {
+  while(Wire.available()) {
+    unsigned char dataByte = Wire.read();
+    MoveDataPut(dataByte);
+  }
+}
+
+void receiveI2CEvent(int count) {
+  unsigned char action;
+  if (Wire.available()){
+    action = Wire.read();
+    switch (action) {
+      case 0x00 :
+        readConfiguration();
+        break;
+       case 0x80:
+        receiveDataByte();
+        break;
+       case 0x81:
+        break;
+       case 0x82:
+        readDataBlock();
+       default :
+        break;
+    }
+  }
+}
+
+void requestI2CEvent() {
+  Wire.write(moveDataLength);
 }
 
 // Reset all movement variables
@@ -120,17 +165,16 @@ void ResetMovementVariables()
 {
   leftDelta = rightDelta = leftStartPos = rightStartPos = leftCurPos = rightCurPos = 0;
   sliceStartTime = curTime;
-
-#ifdef ENABLE_PENUP
-  penTransitionDirection = 0;
-  penUpServo.write(PENUP_ANGLE);
-#endif  
 }
 
 // Main execution loop
 // --------------------------------------
 void loop() {
   curTime = micros();
+  while (true) {
+    delayMicroseconds(100);
+  }
+  /*
   if (curTime < sliceStartTime) { // protect against 70 minute overflow
     sliceStartTime = 0;
   }
@@ -143,7 +187,7 @@ void loop() {
     if (!penTransitionDirection) {
       sliceStartTime = curTime;
     }
-  } else {	
+  } else {
 #endif
     // move to next slice if necessary
     while(curSliceTime > TIME_SLICE_US) {
@@ -151,21 +195,23 @@ void loop() {
       curSliceTime -= TIME_SLICE_US;
       sliceStartTime += TIME_SLICE_US;
 
-#ifdef ENABLE_PENUP	
+#ifdef ENABLE_PENUP
       if (penTransitionDirection) {
         sliceStartTime = curTime;
         return;
       }
-#endif      
+#endif
     }
-	
-    UpdateStepperPins(curSliceTime);
-#ifdef ENABLE_PENUP    
-  }
-#endif  
 
-  ReadSerialMoveData();
-  RequestMoreSerialMoveData();
+    UpdateStepperPins(curSliceTime);
+#ifdef ENABLE_PENUP
+  }
+#endif
+
+//  ReadSerialMoveData();
+//  RequestMoreSerialMoveData();
+*/
+
 }
 
 // Update stepper pins
@@ -190,19 +236,19 @@ void UpdateStepperPins(long curSliceTime) {
 
   do {
     if (leftSteps) {
-      Step(LEFT_STEP_PIN, LEFT_DIR_PIN, leftPositiveDir);
+      Step(controllerConfig.pins.leftStep, controllerConfig.pins.leftDir, leftPositiveDir);
       if (leftPositiveDir) {
         leftCurPos += POS_FACTOR;
       } else {
         leftCurPos -= POS_FACTOR;
       }
       leftSteps--;
-      
-      UpdateStatusLeds(leftCurPos >> 13);
+
+//      UpdateStatusLeds(leftCurPos >> 13);
     }
 
     if (rightSteps) {
-      Step(RIGHT_STEP_PIN, RIGHT_DIR_PIN, rightPositiveDir);
+      Step(controllerConfig.pins.rightStep, controllerConfig.pins.rightDir, rightPositiveDir);
       if (rightPositiveDir) {
         rightCurPos += POS_FACTOR;
       } else {
@@ -223,41 +269,26 @@ void UpdateStepperPins(long curSliceTime) {
 // --------------------------------------
 #ifdef ENABLE_PENUP
 void UpdatePenTransition(long curSliceTime) {
-	
+
   //int targetAngle = ((float)(PENDOWN_ANGLE - PENUP_ANGLE) * ((float)curSliceTime / (float)PENUP_TRANSITION_US)) + PENUP_ANGLE;
   //if (targetAngle > PENDOWN_ANGLE) {
     //targetAngle = PENDOWN_ANGLE;
-    
+
     if (curSliceTime > PENUP_COOLDOWN_US) {
       penTransitionDirection = 0; // are done moving the pen servo
     }
   //}
 
   if (penTransitionDirection == 1) {
-	//targetAngle = 180 - targetAngle;
-    penUpServo.write(PENUP_ANGLE);
+  //targetAngle = 180 - targetAngle;
+    penUpServo.write(controllerConfig.penUpAngle);
   } else if (penTransitionDirection == -1) {
-    penUpServo.write(PENDOWN_ANGLE);
+    penUpServo.write(controllerConfig.penDownAngle);
   }
 
   //penUpServo.write(targetAngle);
 }
 #endif
-
-// Update status leds
-// --------------------------------------
-void UpdateStatusLeds(int value) {
-  // output the time to the leds in binary
-  digitalWrite(LED_PINS[0], value & 0x1);
-  digitalWrite(LED_PINS[1], value & 0x2);
-  digitalWrite(LED_PINS[2], value & 0x4);
-}
-
-// Update receive leds
-// --------------------------------------
-void UpdateReceiveLed(boolean value) {
-  digitalWrite(LED_PINS[3], value);
-}
 
 // Step
 // --------------------------------------
@@ -280,8 +311,8 @@ void SetSliceVariables() {
   } else {
     leftDelta = MoveDataGet();
     rightDelta = MoveDataGet();
-    
-#ifdef ENABLE_PENUP	
+
+#ifdef ENABLE_PENUP
     if (leftDelta == PENUP_COMMAND) {
       leftDelta = rightDelta = 0;
       penTransitionDirection = 1;
@@ -293,49 +324,29 @@ void SetSliceVariables() {
     if (leftDelta == PENUP_COMMAND || leftDelta == PENDOWN_COMMAND) {
        leftDelta = rightDelta = 0;
     }
-#endif    
+#endif
   }
-}                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
-
-// Stop everything and blink the status led value times
-// --------------------------------------
-void Blink(char value) {
- int counts = value;
-  if (counts<0) counts=-counts;
-
-  UpdateReceiveLed(false);
-  for(int i=0;i<counts;i++) {
-   delay(1000);
-   UpdateReceiveLed(true);
-   delay(1000);
-   UpdateReceiveLed(false);
-    
-  }
-  delay(100000);
 }
+
 
 // Read serial data if its available
 // --------------------------------------
-void ReadSerialMoveData() {     
+void ReadSerialMoveData() {
 
   if(Serial.available()) {
     char value = Serial.read();
-    
+
     // Check if this value is the sentinel reset value
     if (value == RESET_COMMAND) {
       ResetMovementVariables();
       moveDataRequestPending = 0;
       moveDataLength = 0;
-      UpdateReceiveLed(false);
       return;
     }
 
     MoveDataPut(value);
     moveDataRequestPending--;
 
-    if (!moveDataRequestPending) {
-      UpdateReceiveLed(false);
-    }
   }
 }
 
@@ -354,7 +365,7 @@ void MoveDataPut(char value) {
     if (moveDataStart == MOVE_DATA_CAPACITY) {
       moveDataStart = 0;
     }
-  } 
+  }
   else {
     moveDataLength++;
   }
@@ -386,7 +397,54 @@ void RequestMoreSerialMoveData() {
   // request 128 bytes of data
   Serial.write(128);
   moveDataRequestPending = 128;
-  UpdateReceiveLed(true);
 }
 
 
+void AutoHome() {
+  bool rHoming = true;
+  bool lHoming = true;
+
+  for (int i = 0; i < 200; i++) {
+    Step(controllerConfig.pins.leftStep, controllerConfig.pins.leftDir, 0);
+    Step(controllerConfig.pins.rightStep, controllerConfig.pins.rightDir, 1);
+   delay(10);
+  }
+
+  while (rHoming || lHoming) {
+    pinMode(controllerConfig.pins.leftStopSense, INPUT);
+    pinMode(controllerConfig.pins.rightStopSense, INPUT);
+    digitalWrite(controllerConfig.pins.leftStopSense, LOW);
+    digitalWrite(controllerConfig.pins.rightStopSense, LOW);
+    unsigned long startTime = micros();
+    unsigned long time = micros() - startTime;
+    bool lhigh = true;
+    bool rhigh = true;
+    while ((lhigh || rhigh) && (time < controllerConfig.senseTimeout))
+    {
+      if (lhigh && lHoming && (digitalRead(controllerConfig.pins.leftStopSense) == LOW)) {
+        lhigh = false;
+        if (time > controllerConfig.senseTrigger) {
+          lHoming = false;
+        }
+      }
+      if (rhigh && rHoming &&(digitalRead(controllerConfig.pins.rightStopSense) == LOW)) {
+        rhigh = false;
+        if (time > controllerConfig.senseTrigger) {
+          rHoming = false;
+        }
+      }
+      time = micros() - startTime;
+    }
+    pinMode(controllerConfig.pins.leftStopSense, OUTPUT);
+    pinMode(controllerConfig.pins.rightStopSense, OUTPUT);
+    digitalWrite(controllerConfig.pins.leftStopSense, HIGH);
+    digitalWrite(controllerConfig.pins.rightStopSense, HIGH);
+    if (lHoming) {
+      Step(controllerConfig.pins.leftStep, controllerConfig.pins.leftDir, 1);
+    }
+    if (rHoming) {
+      Step(controllerConfig.pins.rightStep, controllerConfig.pins.rightDir, 0);
+    }
+    delayMicroseconds(300000);
+  }
+}

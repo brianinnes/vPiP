@@ -214,9 +214,9 @@ EOF
     export CXX=/usr/bin/arm-linux-gnueabihf-g++
     make DEVELOP=DEVELOP SSL=SSL INC_DIR="/usr/local/include src" LIB_DIR=lib_arm dump
     make DEVELOP=DEVELOP SSL=SSL INC_DIR="/usr/local/include src" LIB_DIR=lib_arm
-    install -m 644  lib_arm/libpaho-mqttpp3.so.0.5.0 /usr/local/lib/arm-linux-gnueabihf-gcc/libpaho-mqttpp3.so.0.5.0
-    ln -s libpaho-mqttpp3.so.0.5.0 /usr/local/lib/arm-linux-gnueabihf-gcc/libpaho-mqttpp3.so.0
-    ln -s libpaho-mqttpp3.so.0.5.0 /usr/local/lib/arm-linux-gnueabihf-gcc/libpaho-mqttpp3.so
+    install -m 644  lib_arm/libpaho-mqttpp3.so.1.0.0 /usr/local/lib/arm-linux-gnueabihf-gcc/libpaho-mqttpp3.so.1.0.0
+    ln -s libpaho-mqttpp3.so.1.0.0 /usr/local/lib/arm-linux-gnueabihf-gcc/libpaho-mqttpp3.so.1
+    ln -s libpaho-mqttpp3.so.1.0.0 /usr/local/lib/arm-linux-gnueabihf-gcc/libpaho-mqttpp3.so
     export CC=${ARM6_CROSS_BASEx64}/bin/${ARM6_CROSS_PREFIX}gcc
     export CXX=${ARM6_CROSS_BASEx64}/bin/${ARM6_CROSS_PREFIX}g++
     export LD_LIBRARY_PATH=${ARM6_CROSS_BASE}/arm-linux-gnueabihf/lib
@@ -226,9 +226,9 @@ EOF
     export CC=$CC
     export CXX=$CXX
     export LD_LIBRARY_PATH=$LD_LIBRARY_PATH_ORG
-    install -m 644  lib_arm6/libpaho-mqttpp3.so.0.5.0 /usr/local/lib/arm6-linux-gnueabihf-gcc/libpaho-mqttpp3.so.0.5.0
-    ln -s libpaho-mqttpp3.so.0.5.0 /usr/local/lib/arm6-linux-gnueabihf-gcc/libpaho-mqttpp3.so.0
-    ln -s libpaho-mqttpp3.so.0.5.0 /usr/local/lib/arm6-linux-gnueabihf-gcc/libpaho-mqttpp3.so
+    install -m 644  lib_arm6/libpaho-mqttpp3.so.1.0.0 /usr/local/lib/arm6-linux-gnueabihf-gcc/libpaho-mqttpp3.so.1.0.0
+    ln -s libpaho-mqttpp3.so.1.0.0 /usr/local/lib/arm6-linux-gnueabihf-gcc/libpaho-mqttpp3.so.1
+    ln -s libpaho-mqttpp3.so.1.0.0 /usr/local/lib/arm6-linux-gnueabihf-gcc/libpaho-mqttpp3.so
     export CC=$CC_ORG
     echo "********** Building project **********"
     cd /vagrant/boardDriver

@@ -1,8 +1,13 @@
 *.pyc
 *.DS_Store
+*.o
 .idea
 nonGit
 openssl
 paho.mqtt.c
 paho.mqtt.cpp
 .vagrant
+local.mk
+boardDriver/json
+boardDriver/rsp1Release
+boardDriver/rspRelease
