@@ -456,7 +456,7 @@ class SVG:
                     self.svgElement = n
                 if n is not None:
                     self.children.append(n)
-        if self.svgElement is not None and not "width" in self.svgElement.__dict__:
+        if self.svgElement is not None and "width" in self.svgElement.__dict__:
             if "viewBox" in self.svgElement.__dict__:
                 parts = re.findall(r"[\w.]+",  self.svgElement.viewBox)
                 self.svgElement.width = parts[2]
