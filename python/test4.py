@@ -18,10 +18,11 @@ from vPiP.renderers.svg import renderSVG
 
 
 filename = "../testImages/Vulcan.svg"
+#filename = "../testImages/sketch1.svg"
 
 with Vpip() as p:
 #    p.setShowDrawing(True)
-#    p.setPlotting(False)
+    p.setPlotting(True)
     try:
         renderSVG(filename, 300, 200, 600, p)
         renderSVG(filename, 200, 1000, 800, p)
@@ -29,6 +30,8 @@ with Vpip() as p:
         d = ConstrainDrawingRectangle(1200, 0, 5000, p.height, p)
         renderSVG(filename, 1200, 0, 3800, d, True)
         p.goHome()
+        p.end()
+        print (f"Number of coords draws = {p.count:d}")
     except:
         exc_type, exc_value, exc_traceback = sys.exc_info()
         print("test1 main thread exception : %s" % exc_type)

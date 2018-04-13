@@ -31,6 +31,7 @@ with Vpip() as p:
         renderNorwegianSpiral(filename, 0, 1950, 1200, 9.8, 10, 3, p)
         renderNorwegianSpiral(filename, 1200, 0, 3800, 9.9, 10, 3, p)
         p.goHome()
+        p.end()
     except:
         exc_type, exc_value, exc_traceback = sys.exc_info()
         print("test1 main thread exception : %s" % exc_type)

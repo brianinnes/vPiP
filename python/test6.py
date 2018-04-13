@@ -40,6 +40,7 @@ with Vpip() as p:
         renderConcentricCircleArc(filename, 0, 1950, 1200, 20, p)
         renderConcentricCircleArc(filename, 1250, 50, 3700, 25, p)
         p.goHome()
+        p.end()
     except:
         exc_type, exc_value, exc_traceback = sys.exc_info()
         print("test1 main thread exception : %s" % exc_type)

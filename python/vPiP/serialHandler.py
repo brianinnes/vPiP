@@ -13,6 +13,10 @@
 # limitations under the License.
 import sys
 import traceback
+import json
+import paho.mqtt.client as mqtt
+import ssl
+import random
 from array import array
 from threading import Thread, Event
 from multiprocessing import Process, Event, JoinableQueue
@@ -20,6 +24,7 @@ from serial import Serial
 from .coordinates import Coordinate, PolarCoordinate
 from .interpolator import TrapezoidInterpolater
 from time import sleep
+
 #try:
 #    from Queue import Queue
 #except ImportError:
@@ -38,8 +43,11 @@ class SerialHandler:
         self.serialPort = None
         self.coordWorker = None
         self.stepWorker = None
+        self.mqttClient = None
 
-    def _coordHandlerThread(self, q, sq, stopRequest, stopRequestStep, started):
+    def _coordHandlerThread(self, q, stopRequest, started):
+
+        self.mqttClient.loop_start()
         totalLeftSteps = 0
         totalRightSteps = 0
         currentPenup = True
@@ -56,21 +64,41 @@ class SerialHandler:
         started.set()
         target = q.get()
         q.task_done()
+        drawingID = random.randint(1,65535)
+        startTopic = "{}/start".format(self.config.plotterId)
+        coordTopic = "{}/coord".format(self.config.plotterId)
+        endTopic = "{}/end".format(self.config.plotterId)
+        print("MQTT coordinate topic : %s" % coordTopic)
+        topic = "{}/steps".format(self.config.plotterId)
 
-        while (not q.empty()) or (not stopRequest.is_set()):
+        message = '{{\"id\": {} }}'.format(drawingID)
+        self.mqttClient.publish(startTopic, message)
+#        while (not q.empty()) or (not stopRequest.is_set()):
+        while (not q.empty()):
             try:
                 if q.empty():
                     nextTarget = target
                 else:
                     nextTarget = q.get()
                     q.task_done()
+
+#                message = json.dumps({"x": target.x, "y": target.y, "penup": target.penup})
+                message = '{{\"id\": {}, \"x\": {}, \"y\" : {}, \"pUp\" : {} }}'.format(drawingID, target.x, target.y, "true" if target.penup else "false")
+                self.mqttClient.publish(coordTopic, message)
+
                 if target.penup != currentPenup:
-                    if target.penup:
-                        sq.put(self.config.penUpCommand)
-                        sq.put(self.config.penUpCommand)
-                    else:
-                        sq.put(self.config.penDownCommand)
-                        sq.put(self.config.penDownCommand)
+#                    if target.penup:
+#                       sq.put(self.config.penUpCommand)
+#                       sq.put(self.config.penUpCommand)
+#                        message = json.dumps({"L": self.config.penUpCommand, "R": self.config.penUpCommand})
+#                        message = 'p u'
+#                        self.mqttClient.publish(topic, message)
+#                    else:
+#                        sq.put(self.config.penDownCommand)
+#                        sq.put(self.config.penDownCommand)
+#                        message = json.dumps({"L": self.config.penDownCommand, "R": self.config.penDownCommand})
+#                        message = 'p d'
+#                        self.mqttClient.publish(topic, message)
                     currentPenup = target.penup
                 interp.setup(self.config, origin, target, nextTarget)
                 for timeSlice in range(1, interp.slices + 1):
@@ -82,8 +110,10 @@ class SerialHandler:
                     rs = int(-sliceSteps.rightDist)
                     totalLeftSteps += ls
                     totalRightSteps -= rs
-                    sq.put(ls)
-                    sq.put(rs)
+#                    sq.put(ls)
+#                    sq.put(rs)
+#                    message = json.dumps({"L" : ls, "R" : rs})
+#                    self.mqttClient.publish(topic, message)
                     prevPolarPos = polarHome + PolarCoordinate.fromCoords(totalLeftSteps * scalefactor,
                                                                           totalRightSteps * scalefactor, target.penup)
                 origin = self.config.polar2systemCoords(prevPolarPos)
@@ -93,7 +123,9 @@ class SerialHandler:
                 exc_type, exc_value, exc_traceback = sys.exc_info()
                 print("Coord handler thread exception : %s" % exc_type)
                 traceback.print_tb(exc_traceback, limit=2, file=sys.stdout)
-        stopRequestStep.set()
+            message = '{{\"id\": {} }}'.format(drawingID)
+            self.mqttClient.publish(endTopic, message)
+#        stopRequestStep.set()
 
     def _stepHandlerThread(self, q, stopRequest, started):
         started.set()
@@ -124,14 +156,22 @@ class SerialHandler:
                 traceback.print_tb(exc_traceback, limit=2, file=sys.stdout)
 
     def connect(self):
-        self.serialPort = Serial(self.config.serialPort, self.config.baud, timeout=10)
+        self.mqttClient = mqtt.Client("vPiP_Client")
+        self.mqttClient.username_pw_set(self.config.username, self.config.password)
+        self.mqttClient.tls_insecure_set(True)
+        self.mqttClient.tls_set(ca_certs="/Users/brian/.vpip/m2mqtt_ca.pem", certfile=None, keyfile=None, cert_reqs=ssl.CERT_REQUIRED, tls_version=ssl.PROTOCOL_TLSv1_2, ciphers=None)
+        self.mqttClient.connect(self.config.broker, 8883, keepalive=60)
+
+#        self.serialPort = Serial(self.config.serialPort, self.config.baud, timeout=10)
 #        self.coordWorker = Thread(target=self._coordHandlerThread, args=(self.coordQueue, self.stopRequest, self.startedCoord,))
-        self.coordWorker = Process(target=self._coordHandlerThread, args=(self.coordQueue, self.stepQueue, self.stopRequestCoord, self.stopRequestStep, self.startedCoord, ))
+#        self.coordWorker = Process(target=self._coordHandlerThread, args=(self.coordQueue, self.stepQueue, self.stopRequestCoord, self.stopRequestStep, self.startedCoord, ))
+        self.coordWorker = Process(target=self._coordHandlerThread, args=(self.coordQueue, self.stopRequestCoord, self.startedCoord, ))
         self.coordWorker.start()
 #        self.stepWorker = Thread(target=self._stepHandlerThread, args=(self.stepQueue, self.stopRequest, self.startedStepWorker,))
-        self.stepWorker = Process(target=self._stepHandlerThread, args=(self.stepQueue, self.stopRequestStep, self.startedStepWorker, ))
-        self.stepWorker.start()
-        while (not self.startedCoord.is_set()) or (not self.startedStepWorker.is_set()):
+#        self.stepWorker = Process(target=self._stepHandlerThread, args=(self.stepQueue, self.stopRequestStep, self.startedStepWorker, ))
+#        self.stepWorker.start()
+#        while (not self.startedCoord.is_set()) or (not self.startedStepWorker.is_set()):
+        while (not self.startedCoord.is_set()):
             sleep(0)
         self.connected = True
         print("Connected to Vpip")
@@ -139,10 +179,12 @@ class SerialHandler:
     def disconnect(self):
         self.stopRequestCoord.set()
         self.coordQueue.join()
-        self.stepQueue.join()
+#        self.stepQueue.join()
         self.coordWorker.join()
-        self.stepWorker.join()
-        self.serialPort.close()
+#        self.stepWorker.join()
+#        self.serialPort.close()
+        self.mqttClient.disconnect()
+        self.mqttClient.loop_stop()
 
     def sendCommand(self, command):
         if not self.connected:

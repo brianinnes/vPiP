@@ -65,6 +65,10 @@ class PolarConfig:
         self.pixelsPerMM = 0.0
         self.heightPixels = 0.0
         self.heightScreen = 0
+        self.broker = None
+        self.plotterId = None
+        self.username = None
+        self.password = None
         self.loadConfig()
 
     def __str__(self):
@@ -103,7 +107,11 @@ class PolarConfig:
              "screenX = {}".format(self.screenX),
              "screenY = {}".format(self.heightScreen),
              "showImage = {}".format(self.showImage),
-             "saveImage = {}".format(self.saveImage)))
+             "saveImage = {}".format(self.saveImage),
+             "MQTT broker = {}".format(self.broker),
+             "Plotter ID = {}".format(self.plotterId),
+             "username = {}".format(self.username),
+             "password = {}".format(self.password)))
 
     def loadConfig(self):
         self.configFile = expanduser("~/.vpip/config.cfg")
@@ -139,6 +147,10 @@ class PolarConfig:
             self.screenX = config.getint('Screen', 'screenX')
             self.showImage = config.getboolean('Screen', 'showImage')
             self.saveImage = config.getboolean('Screen', 'saveImage')
+            self.broker = config.get('mqtt', 'broker')
+            self.plotterId = config.get('mqtt', 'plotterId')
+            self.username = config.get('mqtt', 'username')
+            self.password = config.get('mqtt', 'password')
         else:
             self.configured = False
             self.createDefaultConfig()
@@ -187,6 +199,10 @@ class PolarConfig:
         config.set('Screen', 'screenX', '1')
         config.set('Screen', 'showImage', 'False')
         config.set('Screen', 'saveImage', 'False')
+        config.set('mqtt', 'broker', 'localhost')
+        config.set('mqtt', 'plotterId', 'plotter')
+        config.set('mqtt', 'username', ' ')
+        config.set('mqtt', 'password', ' ')
         if not exists(dirname(self.configFile)):
             try:
                 makedirs(dirname(self.configFile))
@@ -229,6 +245,10 @@ class PolarConfig:
             config.set('Screen', 'screenX', self.screenX)
             config.set('Screen', 'showImage', self.showImage)
             config.set('Screen', 'saveImage', self.saveImage)
+            config.set('mqtt', 'broker', self.broker)
+            config.set('mqtt', 'plotterId', self.plotterId)
+            config.set('mqtt', 'username', self.username)
+            config.set('mqtt', 'password', self.password)
             if not exists(dirname(self.configFile)):
                 try:
                     makedirs(dirname(self.configFile))

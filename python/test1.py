@@ -18,8 +18,8 @@ from vPiP import *
 Vpip = vPiP.Vpip
 
 with Vpip() as p:
-    p.setShowDrawing(True)
-    p.setPlotting(False)
+    p.setShowDrawing(False)
+    p.setPlotting(True)
     try:
         p.moveTo(0, 0)
         p.drawTo(p.config.pixels, 0)
@@ -42,6 +42,7 @@ with Vpip() as p:
                 y += gridY
             x += gridX
         p.goHome()
+        p.end()
     except:
         exc_type, exc_value, exc_traceback = sys.exc_info()
         print("test1 main thread exception : %s" % exc_type)

@@ -19,8 +19,8 @@ from vPiP.generators.spiral import generateSpiral
 Vpip = vPiP.Vpip
 
 with Vpip() as p:
-#    p.setShowDrawing(True)
-#    p.setPlotting(False)
+    p.setShowDrawing(False)
+    p.setPlotting(True)
     try:
         d = 100.0
         for x in range(100, 2500, 240):
@@ -38,6 +38,7 @@ with Vpip() as p:
                 p.drawTo(j[0], j[1])
             d += 100.0
         p.goHome()
+        p.end()
     except:
         exc_type, exc_value, exc_traceback = sys.exc_info()
         print("test1 main thread exception : %s" % exc_type)
