@@ -74,6 +74,7 @@ Vagrant.configure("2") do |config|
   config.vm.synced_folder ".", "/vagrant", type: "virtualbox", nfs: true
 
   config.vm.provision "shell", inline: <<-SHELL
+    hostname -b vagrant
     export ARM6_CROSS_BASE=/opt/arm-bcm2708hardfp-linux-gnueabi/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian
     export ARM6_CROSS_BASEx64=${ARM6_CROSS_BASE}-x64
     export ARM6_CROSS_PREFIX=arm-linux-gnueabihf-
