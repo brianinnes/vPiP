@@ -23,13 +23,21 @@ To setup auto login open a terminal and login to the vagrant build machine
 `vagrant up`   
 `vagrant ssh`
 
-Generate a certificate:   
-`ssh-keygen -t rsa`   
-accept all the default, DO NOT enter a password - leave blank   
+Generate a certificate - on the raspberry pi:
+`cd .ssh`   
+`ssh-keygen -t rsa` accept all the default, DO NOT enter a password - leave blank     
+`cat id_rsa.pub >> authorized_keys`  
+`chmod 600 authorized_keys`  
+`rm id_rsa.pub`  
 
-Copy the certificate to the target Raspberry Pi using the following commands, replacing the host name (*raspberrypi.local*) with the host name or IP address of your pi:   
+Copy the certificate to the target Raspberry Pi using the following commands, replacing the host name (*raspberrypi.local*) with the host name or IP address of your pi:
+`export REMOTE_PI=raspberrypi.local`   
 `ssh pi@raspberrypi.local mkdir -p .ssh`   
-`cat ~/.ssh/id_rsa.pub | ssh pi@raspberrypi.local 'cat >> .ssh/authorized_keys'`
+`cat ~/.ssh/id_rsa | ssh pi@$REMOTE_PI 'cat >> .ssh/vagrant.rsa'`  
+`ssh pi@$REMOTE_PI chmod 600 .ssh/vagrant.rsa`  
+`ssh pi@$REMOTE_PI 'echo "Host vagrant" >> .ssh/config'`  
+`ssh pi@$REMOTE_PI 'echo "Hostname vagrant.local" >> .ssh/config'`  
+`ssh pi@$REMOTE_PI 'echo "IdentityFile ~/.ssh/vagrant.rsa" >> .ssh/config'`  
 
 
 #Installing MQTT on a Raspberry Pi
