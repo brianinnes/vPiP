@@ -64,6 +64,8 @@ class MQTTPlotter(outputter):
         self.goHome()
         message = '{{\"id\": {} }}'.format(self.drawingID)
         self.mqttClient.publish(self.endTopic, message)
+        sleep(2)
+        self.mqttClient.disconnect()
 
     def penUp(self):
         self.currPosSysCoords = Coordinate.fromCoords(self.currPosSysCoords.x, self.currPosSysCoords.y, True)
