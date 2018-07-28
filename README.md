@@ -5,9 +5,9 @@ A python library targeted to run on a Raspberry Pi with accompanying Arduino cod
 
 Links:  
 
-- makeBournemouth [https://www.makebournemouth.com]()
-- Controller board : [https://github.com/MarkJB/Eggbot-Spherebot-PyPlotter-Controller]()
+- makeBournemouth [https://www.makebournemouth.com](https://www.makebournemouth.com)
+- Controller board : [https://github.com/MarkJB/Eggbot-Spherebot-PyPlotter-Controller](https://github.com/MarkJB/Eggbot-Spherebot-PyPlotter-Controller)
 
-Inspired by the Polargraph project [http://www.polargraph.co.uk]() and gocupi project [https://github.com/brandonagr/gocupi]()
+Inspired by the Polargraph project [http://www.polargraph.co.uk](http://www.polargraph.co.uk) and gocupi project [https://github.com/brandonagr/gocupi](https://github.com/brandonagr/gocupi)
 
-To run this library you need Python installed with the Python Imaging Library fork, Pillow.  Installation instructions are here : [https://pillow.readthedocs.org/en/latest/installation.html]()
+To run this library you need Python installed with the Python Imaging Library fork, Pillow.  Installation instructions are here : [https://pillow.readthedocs.org/en/latest/installation.html](https://pillow.readthedocs.org/en/latest/installation.html)
