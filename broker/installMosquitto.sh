@@ -11,9 +11,10 @@ EOF
 echo "********** Securing Mosquitto **********"
 openssl genrsa -aes256 -passout pass:passw0rd -out m2mqtt_ca.key 2048 -batch
 openssl req -new -sha256 -x509 -days 3650 -key m2mqtt_ca.key -passin pass:passw0rd -out m2mqtt_ca.crt -subj "/C=GB/ST=Bournemouth/L=Bournemouth/O=MakeBournemouth/OU=vPiP/CN=makebournemouth.com" -batch
-openssl genrsa -out m2mqtt_srv.key 2048 -batch
-openssl req -new -sha256 -out m2mqtt_srv.csr -key m2mqtt_srv.key -passin pass:passw0rd -subj "/C=GB/ST=Bournemouth/L=Bournemouth/O=MakeBournemouth/OU=vPiP/CN=vpipBroker.local" -batch
+openssl genrsa -passout pass:passw0rd -out m2mqtt_srv_pwd.key 2048 -batch
+openssl req -new -sha256 -out m2mqtt_srv.csr -key m2mqtt_srv_pwd.key -passin pass:passw0rd -subj "/C=GB/ST=Bournemouth/L=Bournemouth/O=MakeBournemouth/OU=vPiP/CN=vpipBroker.local" -batch
 openssl x509 -req -in m2mqtt_srv.csr -CA m2mqtt_ca.crt -CAkey m2mqtt_ca.key -CAcreateserial -passin pass:passw0rd -out m2mqtt_srv.crt -days 3650
+openssl rsa -in m2mqtt_srv_pwd.key -out m2mqtt_srv.key
 rm m2mqtt_srv.csr
 mv m2mqtt_ca.* /etc/mosquitto/ca_certificates
 mv m2mqtt_srv.* /etc/mosquitto/certs
