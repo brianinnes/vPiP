@@ -11,7 +11,7 @@ EOF
 echo "********** Securing Mosquitto **********"
 openssl genrsa -aes256 -passout pass:passw0rd -out m2mqtt_ca.key 2048 -batch
 openssl req -new -sha256 -x509 -days 3650 -key m2mqtt_ca.key -passin pass:passw0rd -out m2mqtt_ca.crt -subj "/C=GB/ST=Bournemouth/L=Bournemouth/O=MakeBournemouth/OU=vPiP/CN=makebournemouth.com" -batch
-openssl genrsa -aes256 -out m2mqtt_srv.key 2048 -batch
+openssl genrsa -out m2mqtt_srv.key 2048 -batch
 openssl req -new -sha256 -out m2mqtt_srv.csr -key m2mqtt_srv.key -passin pass:passw0rd -subj "/C=GB/ST=Bournemouth/L=Bournemouth/O=MakeBournemouth/OU=vPiP/CN=vpipBroker.local" -batch
 openssl x509 -req -in m2mqtt_srv.csr -CA m2mqtt_ca.crt -CAkey m2mqtt_ca.key -CAcreateserial -passin pass:passw0rd -out m2mqtt_srv.crt -days 3650
 rm m2mqtt_srv.csr
